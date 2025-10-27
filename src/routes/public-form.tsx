@@ -670,6 +670,14 @@ app.get('/', (c) => {
           }));
           bookCombobox.setItems(bookItems);
 
+          // Step 1: Handle Enter key on name input
+          userNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              nextStep1Btn.click();
+            }
+          });
+
           // Step 1: Next button
           nextStep1Btn.addEventListener('click', () => {
             const name = userNameInput.value.trim();
