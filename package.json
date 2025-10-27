@@ -7,18 +7,21 @@
   "scripts": {
     "dev:wrangler": "wrangler dev",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
+    "db:push": "dotenv -e .env -- drizzle-kit push",
+    "db:push:production": "dotenv -e .env.production -- drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "tsx -r dotenv/config src/scripts/migrate.ts",
-    "upload:translation": "tsx -r dotenv/config src/scripts/upload-translation.ts bibles/raw/ron-rccv.usfx.xml vdcc",
-    "generate:docs-options": "tsx -r dotenv/config scripts/generate-docs-options.ts",
+    "upload:translation": "dotenv -e .env -- tsx src/scripts/upload-translation.ts bibles/raw/ron-rccv.usfx.xml vdcc",
+    "generate:docs-options": "dotenv -e .env -- tsx scripts/generate-docs-options.ts",
     "predeploy": "npm run generate:docs-options",
     "deploy": "wrangler deploy --minify",
-    "push:env": "tsx -r dotenv/config src/scripts/push-env.ts production"
+    "push:env": "dotenv -e .env -- tsx src/scripts/push-env.ts production",
+    "lint": "eslint src --max-warnings 0",
+    "lint:fix": "eslint src --fix",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "bible",
-    "parser",
+    "api",
     "mcp"
   ],
   "author": "",
@@ -39,8 +42,13 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251014.0",
+    "@eslint/js": "^9.38.0",
+    "dotenv-cli": "^10.0.0",
     "drizzle-kit": "^0.31.5",
+    "eslint": "^9",
     "tsx": "^4.20.6",
+    "typescript-eslint": "^8.46.2",
     "wrangler": "^4.4.0"
   }
 }

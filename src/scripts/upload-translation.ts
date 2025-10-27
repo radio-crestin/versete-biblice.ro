@@ -1,11 +1,8 @@
 #!/usr/bin/env tsx
 
-import dotenv from 'dotenv';
 import { uploadBibleTranslation } from '../services/bible-parser.service.js';
 import { logger } from '../utils/logger.js';
 import path from 'path';
-
-dotenv.config();
 
 // Parse command line arguments
 const args = process.argv.slice(2);

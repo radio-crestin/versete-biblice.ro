@@ -3,9 +3,6 @@
 import { migrate } from 'drizzle-orm/libsql/migrator';
 import { db, client } from '../db/client.js';
 import { logger } from '../utils/logger.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 async function runMigrations() {
   try {

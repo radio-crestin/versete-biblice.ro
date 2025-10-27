@@ -1,7 +1,4 @@
 import { defineConfig } from 'drizzle-kit';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 // Use local database in development or when Turso URL is not set
 const useLocal = !process.env.TURSO_DATABASE_URL || process.env.NODE_ENV === 'development';

@@ -1,15 +1,12 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import * as schema from './schema.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 // Create client - use local database if Turso URL not provided or in development
-const useLocal = !process.env.TURSO_DATABASE_URL;
+const useLocal = (process.env.TURSO_DATABASE_URL ?? '') === '';
 
 const client = createClient({
-  url: useLocal ? 'file:local.db' : process.env.TURSO_DATABASE_URL!,
+  url: useLocal ? 'file:local.db' : (process.env.TURSO_DATABASE_URL ?? ''),
   authToken: useLocal ? undefined : process.env.TURSO_AUTH_TOKEN,
 });
 
