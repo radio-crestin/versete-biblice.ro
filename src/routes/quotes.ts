@@ -6,6 +6,7 @@ import {
   ErrorSchema,
 } from '@/schemas/index';
 import { upsertQuote, getPublishedQuotes } from '@/services/quotes.service';
+import { parseReference } from '@/utils/reference-parser';
 
 const app = new OpenAPIHono();
 
@@ -16,22 +17,32 @@ const createQuoteRoute = createRoute({
   operationId: 'createQuote',
   tags: ['Bible Quotes'],
   summary: 'Create a Bible quote',
-  description: `Create a new Bible quote with a reference and user note. The client IP address is automatically captured.
+  description: `Create a new Bible quote using either a reference string OR individual fields. The client IP address is automatically captured.
 
-**Example:**
+**Using reference string (recommended):**
 \`\`\`json
 {
-  "userName": "John Doe",
   "reference": "Genesis 1:1-5",
+  "userName": "John Doe",
+  "userLanguage": "en",
+  "userNote": "In the beginning..."
+}
+\`\`\`
+
+**Using individual fields:**
+\`\`\`json
+{
   "startBook": "genesis",
   "startChapter": 1,
   "startVerse": 1,
   "endVerse": 5,
+  "userName": "John Doe",
   "userLanguage": "en",
-  "userNote": "In the beginning...",
-  "published": true
+  "userNote": "In the beginning..."
 }
-\`\`\``,
+\`\`\`
+
+**Note:** You must provide EITHER reference OR individual fields (startBook, startChapter, startVerse), not both. All fields except the reference/individual fields are optional.`,
   request: {
     body: {
       content: {
@@ -80,26 +91,98 @@ app.openapi(createQuoteRoute, async (c) => {
     const body = c.req.valid('json');
 
     // Capture client IP address
-    const clientIp = c.req.header('cf-connecting-ip') // Cloudflare
-      || c.req.header('x-forwarded-for')?.split(',')[0].trim()
-      || c.req.header('x-real-ip')
-      || 'unknown';
+    const cfIp = c.req.header('cf-connecting-ip');
+    const forwardedFor = c.req.header('x-forwarded-for');
+    const realIp = c.req.header('x-real-ip');
+    const clientIp = cfIp ?? (forwardedFor?.split(',')[0].trim() ?? (realIp ?? 'unknown'));
+
+    let reference: string;
+    let startBook: string;
+    let endBook: string | null = null;
+    let startChapter: number;
+    let endChapter: number | null = null;
+    let startVerse: number;
+    let endVerse: number | null = null;
+
+    // If reference is provided, parse it
+    if (body.reference !== undefined && body.reference !== '') {
+      const translationSlug = body.translationSlug ?? 'vdcc';
+      const parsed = await parseReference(body.reference, translationSlug);
+
+      if (parsed === null) {
+        return c.json({
+          success: false,
+          error: 'Invalid reference format. Please use format like "Genesis 1:1" or "Genesis 1:1-5"'
+        }, 400);
+      }
+
+      reference = body.reference;
+      startBook = parsed.book;
+      startChapter = parsed.chapter;
+      startVerse = parsed.verse;
+      endBook = parsed.endBook ?? null;
+      endChapter = parsed.endChapter ?? null;
+      endVerse = parsed.endVerse ?? null;
+    } else {
+      // Use individual fields - body.startBook, startChapter, startVerse are guaranteed to exist by schema validation
+      const reqStartBook = body.startBook ?? '';
+      const reqStartChapter = body.startChapter ?? 0;
+      const reqStartVerse = body.startVerse ?? 0;
+
+      reference = `${reqStartBook} ${String(reqStartChapter)}:${String(reqStartVerse)}`;
+      if (body.endBook !== undefined || body.endChapter !== undefined || body.endVerse !== undefined) {
+        if (body.endBook !== undefined && body.endBook !== reqStartBook) {
+          reference += `-${body.endBook} ${String(body.endChapter ?? reqStartChapter)}:${String(body.endVerse ?? reqStartVerse)}`;
+        } else if (body.endChapter !== undefined && body.endChapter !== reqStartChapter) {
+          reference += `-${String(body.endChapter)}:${String(body.endVerse ?? reqStartVerse)}`;
+        } else if (body.endVerse !== undefined) {
+          reference += `-${String(body.endVerse)}`;
+        }
+      }
+
+      startBook = reqStartBook;
+      startChapter = reqStartChapter;
+      startVerse = reqStartVerse;
+      endBook = body.endBook ?? null;
+      endChapter = body.endChapter ?? null;
+      endVerse = body.endVerse ?? null;
+    }
+
+    // Validate start and end values
+    if (endBook !== null && endBook !== startBook) {
+      // Cross-book reference - no specific validation needed for now
+    } else if (endChapter !== null && endChapter < startChapter) {
+      return c.json({
+        success: false,
+        error: 'End chapter must be greater than or equal to start chapter'
+      }, 400);
+    } else if (endChapter !== null && endChapter === startChapter && endVerse !== null && endVerse < startVerse) {
+      return c.json({
+        success: false,
+        error: 'End verse must be greater than or equal to start verse within the same chapter'
+      }, 400);
+    } else if (endChapter === null && endVerse !== null && endVerse < startVerse) {
+      return c.json({
+        success: false,
+        error: 'End verse must be greater than or equal to start verse'
+      }, 400);
+    }
 
     // Create quote with all fields
     const result = await upsertQuote({
       clientIp,
-      userName: body.userName || null,
-      reference: body.reference,
-      startBook: body.startBook,
-      endBook: body.endBook || null,
-      startChapter: body.startChapter,
-      endChapter: body.endChapter || null,
-      startVerse: body.startVerse,
-      endVerse: body.endVerse || null,
-      userLanguage: body.userLanguage,
-      userNote: body.userNote,
-      published: body.published,
-      publishedAt: body.published ? new Date().toISOString() : null,
+      userName: body.userName ?? null,
+      reference,
+      startBook,
+      endBook,
+      startChapter,
+      endChapter,
+      startVerse,
+      endVerse,
+      userLanguage: body.userLanguage ?? 'en',
+      userNote: body.userNote ?? null,
+      published: true,
+      publishedAt: new Date().toISOString(),
     });
 
     return c.json({
