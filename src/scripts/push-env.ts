@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+ 
+ 
+ 
+ 
+ 
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable no-console */
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -23,12 +31,12 @@ console.log(`📦 Pushing environment variables from .env.production to Cloudfla
 const envContent = readFileSync(envFile, 'utf-8');
 const envVars = envContent
   .split('\n')
-  .filter(line => line.trim() && !line.startsWith('#'))
-  .map(line => {
+  .filter((line: string) => line.trim() && !line.startsWith('#'))
+  .map((line: string) => {
     const [key, ...valueParts] = line.split('=');
     return { key: key.trim(), value: valueParts.join('=').trim() };
   })
-  .filter(({ key, value }) => key && value);
+  .filter(({ key, value }: { key: string; value: string }) => key && value);
 
 if (envVars.length === 0) {
   console.warn(`⚠️  No environment variables found in ${envFile}`);

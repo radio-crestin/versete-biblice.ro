@@ -1,7 +1,6 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
 import { db, translations } from '../db/index.js';
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
 import {
   TranslationsResponseSchema,
   ErrorSchema,
@@ -72,7 +71,7 @@ app.openapi(getAllTranslationsRoute, async (c) => {
   try {
     let results;
 
-    if (language) {
+    if (language !== undefined) {
       // Filter by language
       results = await db
         .select()
@@ -87,7 +86,7 @@ app.openapi(getAllTranslationsRoute, async (c) => {
       success: true,
       count: results.length,
       translations: results,
-    });
+    }, 200);
   } catch (error) {
     console.error('Error fetching translations:', error);
     return c.json({ success: false, error: 'Failed to fetch translations' }, 500);

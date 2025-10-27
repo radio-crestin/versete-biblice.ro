@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { db, translations, verses, type NewVerse } from '../db/index.js';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { logger } from '../utils/logger.js';
 import {
   readXMLFile,
   extractMetadataFromFilename,
   extractTranslationName,
   parseBibleXML,
-  type ParsedBook,
 } from '../utils/xml-parser.js';
-import { BOOK_NAMES, BOOK_ORDER, getTestament } from '../utils/book-names.js';
+import { BOOK_NAMES, getTestament } from '../utils/book-names.js';
 import { getTranslationSlug, getBookSlug } from '../utils/slugify.js';
 
 export interface UploadResult {
@@ -33,7 +35,7 @@ async function upsertTranslation(
   name: string,
   customSlug?: string
 ): Promise<{ id: number; slug: string }> {
-  const slug = customSlug || getTranslationSlug(abbreviation);
+  const slug = customSlug ?? getTranslationSlug(abbreviation);
 
   logger.debug(`Upserting translation: ${language}/${abbreviation} (slug: ${slug})`);
 
@@ -194,7 +196,7 @@ export async function uploadBibleTranslation(
       for (const chapter of book.chapters) {
         totalChapters++;
 
-        for (const [verseId, verseData] of Object.entries(chapter.verses)) {
+        for (const [_verseId, verseData] of Object.entries(chapter.verses)) {
           allVerses.push({
             translationId: translation.id,
             translationSlug: translation.slug,

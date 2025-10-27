@@ -36,7 +36,8 @@ export function getTranslationSlug(abbreviation: string): string {
  */
 export function getBookSlug(bookId: string): string {
   const englishName = BOOK_NAMES[bookId];
-  if (!englishName) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (englishName === undefined) {
     throw new Error(`Unknown book ID: ${bookId}`);
   }
   return slugify(englishName);

@@ -67,7 +67,7 @@ export const LanguageParamSchema = z.object({
       name: 'language',
       in: 'path',
     },
-    example: 'ron',
+    example: 'ro',
   }),
 });
 

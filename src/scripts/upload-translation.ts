@@ -1,4 +1,11 @@
 #!/usr/bin/env tsx
+ 
+ 
+ 
+ 
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 import { uploadBibleTranslation } from '../services/bible-parser.service.js';
 import { logger } from '../utils/logger.js';
@@ -70,7 +77,7 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch((error: unknown) => {
   logger.error('Fatal error:', error);
   process.exit(1);
 });

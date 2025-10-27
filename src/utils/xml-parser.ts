@@ -1,3 +1,9 @@
+ 
+ 
+ 
+ 
+ 
+ 
 import fs from 'fs';
 import path from 'path';
 
@@ -28,7 +34,9 @@ export interface TranslationMetadata {
  * Clean text by removing extra whitespace and formatting
  */
 export function cleanText(text: string): string {
-  if (!text) return '';
+  if (text === '') {
+    return '';
+  }
   return text.trim().replace(/\s+/g, ' ');
 }
 
@@ -50,7 +58,7 @@ export function extractVerses(content: string): Record<string, ParsedVerse> {
     verseText = verseText.replace(/<[^>]+>/g, '');
     verseText = cleanText(verseText);
 
-    if (verseText) {
+    if (verseText !== '') {
       verses[verseId] = {
         id: parseInt(verseId),
         text: verseText,
@@ -67,9 +75,10 @@ export function extractVerses(content: string): Record<string, ParsedVerse> {
  */
 export function extractMetadataFromFilename(xmlFilePath: string): { language: string; abbreviation: string } {
   const filename = path.basename(xmlFilePath);
-  const match = filename.match(/^([a-z]{3})-([a-z0-9]+)\.usfx\.xml$/i);
+  const regex = /^([a-z]{3})-([a-z0-9]+)\.usfx\.xml$/i;
+  const match = regex.exec(filename);
 
-  if (match) {
+  if (match !== null) {
     return {
       language: match[1],
       abbreviation: match[2],
@@ -88,8 +97,9 @@ export function extractMetadataFromFilename(xmlFilePath: string): { language: st
  */
 export function extractTranslationName(xmlContent: string): string | null {
   // Try to find translation name in XML (look for common patterns)
-  const nameMatch = xmlContent.match(/<id\s+type="name">([^<]+)<\/id>/);
-  if (nameMatch) {
+  const nameRegex = /<id\s+type="name">([^<]+)<\/id>/;
+  const nameMatch = nameRegex.exec(xmlContent);
+  if (nameMatch !== null) {
     return nameMatch[1].trim();
   }
   return null;
@@ -110,9 +120,10 @@ export function parseBibleXML(xmlContent: string, bookNamesMap: Record<string, s
     const bookContent = bookMatch[2];
 
     // Extract book title
-    const titleMatch = bookContent.match(/<h>([^<]+)<\/h>/);
-    const bookTitle = titleMatch ? titleMatch[1].trim() : bookNamesMap[bookId] || bookId;
-    const englishName = bookNamesMap[bookId] || bookId;
+    const titleRegex = /<h>([^<]+)<\/h>/;
+    const titleMatch = titleRegex.exec(bookContent);
+    const bookTitle = (titleMatch !== null && titleMatch[1].trim() !== '') ? titleMatch[1].trim() : (bookNamesMap[bookId] ?? bookId);
+    const englishName = bookNamesMap[bookId] ?? bookId;
 
     const chapters: ParsedChapter[] = [];
 

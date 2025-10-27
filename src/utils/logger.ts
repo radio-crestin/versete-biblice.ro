@@ -1,3 +1,10 @@
+ 
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable no-console */
 type LogLevel = 'debug' | 'verbose' | 'trace' | 'info' | 'warning' | 'error';
 
 const LOG_LEVELS: Record<LogLevel, number> = {

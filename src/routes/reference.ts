@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { db, verses } from '../db/index.js';
-import { eq, and, or, gte, lte, sql } from 'drizzle-orm';
+import { eq, and, or, gte, lte } from 'drizzle-orm';
 import { PassageResponseSchema, ErrorSchema } from '../schemas/index.js';
 import { createDynamicPassageParamSchema } from '../utils/dynamic-schema.js';
 import { parseReference } from '../utils/reference-parser.js';
@@ -120,7 +120,7 @@ app.openapi(getReferenceRoute, async (c) => {
     // Parse the reference string
     const parsed = await parseReference(reference, translationSlug);
 
-    if (!parsed) {
+    if (parsed === null) {
       return c.json(
         {
           success: false,
@@ -133,13 +133,13 @@ app.openapi(getReferenceRoute, async (c) => {
     // Extract parsed values
     const { book, chapter, verse, endBook, endChapter, endVerse } = parsed;
     const startBook = book.toLowerCase();
-    const finalEndBook = endBook?.toLowerCase() || startBook;
-    const finalEndChapter = endChapter || chapter;
-    const finalEndVerse = endVerse || verse;
+    const finalEndBook = (endBook !== undefined && endBook.toLowerCase() !== '') ? endBook.toLowerCase() : startBook;
+    const finalEndChapter = (endChapter !== undefined && endChapter !== 0) ? endChapter : chapter;
+    const finalEndVerse = (endVerse !== undefined && endVerse !== 0) ? endVerse : verse;
 
     // Helper function to create book filter
     // The bookValue here is already a resolved book slug from parseReference
-    const createBookFilter = (bookValue: string) => {
+    const createBookFilter = (bookValue: string): ReturnType<typeof eq> => {
       return eq(verses.bookSlug, bookValue);
     };
 
@@ -266,7 +266,7 @@ app.openapi(getReferenceRoute, async (c) => {
         text: v.text,
       })),
       count: passageVerses.length,
-    });
+    }, 200);
   } catch (error) {
     console.error('Error fetching reference:', error);
     return c.json(

@@ -1,0 +1,1 @@
+ALTER TABLE `translations` ADD `copyright_notice` text;

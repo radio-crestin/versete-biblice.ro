@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { BOOK_NAMES } from './book-names.js';
 import { z } from 'zod';
 import translationsData from '../data/translations.json' with { type: 'json' };
@@ -46,7 +48,7 @@ export function createDynamicPassageParamSchema() {
         name: 'translationSlug',
         in: 'path',
       },
-      example: translationSlugs[0] || 'vdcc',
+      example: translationSlugs[0] ?? 'vdcc',
     }),
   });
 }
@@ -87,7 +89,7 @@ export function createDynamicTranslationsQuerySchema() {
 
   return z.object({
     language: z.enum(languages as [string, ...string[]]).optional().describe('Filter by language code').openapi({
-      example: languages[0] || 'ron',
+      example: languages[0] ?? 'ron',
     }),
   });
 }

@@ -95,7 +95,7 @@ async function parseBookFromReference(
     normalizeForComparison(row.bookName) === normalizedBookPart
   );
 
-  if (exactMatch) {
+  if (exactMatch !== undefined) {
     return exactMatch.bookSlug;
   }
 
@@ -133,16 +133,17 @@ async function parseReferencePart(
 ): Promise<{ book: string; chapter: number; verse: number } | null> {
   // Match pattern: "book chapter:verse"
   // This regex handles multi-word books like "1 samuel" or "song of solomon"
-  const match = part.match(/^(.+?)\s+(\d+):(\d+)$/);
+  const regex = /^(.+?)\s+(\d+):(\d+)$/;
+  const match = regex.exec(part);
 
-  if (!match) {
+  if (match === null) {
     return null;
   }
 
   const [, bookPart, chapterStr, verseStr] = match;
   const book = await parseBookFromReference(bookPart, translationSlug);
 
-  if (!book) {
+  if (book === null || book === '') {
     return null;
   }
 
@@ -160,8 +161,9 @@ async function parseReferencePart(
  *   - "2:5" -> { chapter: 2, verse: 5 }
  */
 function parseChapterVerse(part: string): { chapter: number; verse: number } | null {
-  const match = part.match(/^(\d+):(\d+)$/);
-  if (!match) {
+  const regex = /^(\d+):(\d+)$/;
+  const match = regex.exec(part);
+  if (match === null) {
     return null;
   }
 
@@ -200,7 +202,7 @@ export async function parseReference(
 
   // Parse the start reference
   const startPart = await parseReferencePart(parts[0], translationSlug);
-  if (!startPart) {
+  if (startPart === null) {
     return null;
   }
 
@@ -218,7 +220,7 @@ export async function parseReference(
 
   // Try to parse as full reference (book chapter:verse)
   const endPartFull = await parseReferencePart(endPartRaw, translationSlug);
-  if (endPartFull) {
+  if (endPartFull !== null) {
     // Cross-book or explicit book range
     return {
       book: startPart.book,
@@ -232,7 +234,7 @@ export async function parseReference(
 
   // Try to parse as chapter:verse (same book)
   const endChapterVerse = parseChapterVerse(endPartRaw);
-  if (endChapterVerse) {
+  if (endChapterVerse !== null) {
     return {
       book: startPart.book,
       chapter: startPart.chapter,
@@ -244,8 +246,9 @@ export async function parseReference(
   }
 
   // Try to parse as just a verse number (same book and chapter)
-  const verseMatch = endPartRaw.match(/^(\d+)$/);
-  if (verseMatch) {
+  const verseRegex = /^(\d+)$/;
+  const verseMatch = verseRegex.exec(endPartRaw);
+  if (verseMatch !== null) {
     return {
       book: startPart.book,
       chapter: startPart.chapter,

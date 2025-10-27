@@ -1,14 +1,7 @@
 name = "versete-biblice"
 main = "src/index.ts"
 compatibility_date = "2025-09-15"
-compatibility_flags = ["nodejs_compat"]
-
-# Environment variables (set these via wrangler secret put)
-# TURSO_DATABASE_URL
-# TURSO_AUTH_TOKEN
-
-# For local development, use .env file
-# For production, set secrets using: npm run push:env
+compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
 
 [observability]
 [observability.logs]
