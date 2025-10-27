@@ -8,6 +8,7 @@ import {prettyJSON} from 'hono/pretty-json';
 import {translationsRoute} from './routes/translations.js';
 import {passagesRoute} from './routes/passages.js';
 import {referenceRoute} from './routes/reference.js';
+import {quotesRoute} from './routes/quotes.js';
 import mcpRoute from './routes/mcp.js';
 
 const app = new OpenAPIHono();
@@ -26,6 +27,7 @@ app.get('/', (c) => {
 app.route('/api/v1/bible/translations', translationsRoute);
 app.route('/api/v1/bible', passagesRoute);
 app.route('/api/v1/bible', referenceRoute);
+app.route('/api/v1/bible/quotes', quotesRoute);
 
 // MCP Server Route
 app.route('/api/v1', mcpRoute);
@@ -84,6 +86,10 @@ ${baseUrl}/llms.txt
             {
                 name: 'Bible API',
                 description: 'An API for accessing Bible translations and passages',
+            },
+            {
+                name: 'Bible Quotes',
+                description: 'User-generated Bible quotes with notes',
             },
         ],
     };
