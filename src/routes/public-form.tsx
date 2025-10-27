@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
-import { ROMANIAN_BIBLE_BOOKS } from '@/data/romanian-books';
+import vdccBooksData from '@/data/vdcc-books.json';
 
 const app = new Hono();
 
 // Serve the quote submission form
 app.get('/', (c) => {
-  const booksJson = JSON.stringify(ROMANIAN_BIBLE_BOOKS);
+  const booksJson = JSON.stringify(vdccBooksData.books);
 
   return c.html(`
     <!DOCTYPE html>
@@ -353,7 +353,8 @@ app.get('/', (c) => {
             const option = document.createElement('option');
             option.value = book.slug;
             option.textContent = book.name;
-            option.dataset.chapters = book.chapters;
+            option.dataset.maxChapter = book.maxChapter;
+            option.dataset.chapters = JSON.stringify(book.chapters);
             bookSelect.appendChild(option);
           });
 
@@ -401,9 +402,9 @@ app.get('/', (c) => {
               return;
             }
 
-            const chapters = parseInt(selectedOption.dataset.chapters);
+            const maxChapter = parseInt(selectedOption.dataset.maxChapter);
             chapterSelect.innerHTML = '<option value="">Selectează un capitol...</option>';
-            for (let i = 1; i <= chapters; i++) {
+            for (let i = 1; i <= maxChapter; i++) {
               const option = document.createElement('option');
               option.value = i;
               option.textContent = 'Capitolul ' + i;
@@ -426,8 +427,12 @@ app.get('/', (c) => {
               return;
             }
 
-            // Generate verse options (simplified - using max 100 verses)
-            const maxVerses = 100;
+            // Get the selected book's chapter data
+            const selectedBookOption = bookSelect.selectedOptions[0];
+            const chaptersData = JSON.parse(selectedBookOption.dataset.chapters);
+            const selectedChapter = e.target.value;
+            const maxVerses = chaptersData[selectedChapter] || 100;
+
             startVerseSelect.innerHTML = '<option value="">Selectează un verset...</option>';
             for (let i = 1; i <= maxVerses; i++) {
               const option = document.createElement('option');
@@ -450,8 +455,13 @@ app.get('/', (c) => {
               return;
             }
 
+            // Get the selected book's chapter data
+            const selectedBookOption = bookSelect.selectedOptions[0];
+            const chaptersData = JSON.parse(selectedBookOption.dataset.chapters);
+            const selectedChapter = chapterSelect.value;
+            const maxVerses = chaptersData[selectedChapter] || 100;
+
             const startVerse = parseInt(e.target.value);
-            const maxVerses = 100;
             endVerseSelect.innerHTML = '<option value="">Același verset</option>';
             for (let i = startVerse + 1; i <= maxVerses; i++) {
               const option = document.createElement('option');
