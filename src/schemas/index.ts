@@ -117,7 +117,6 @@ export const PassageQuerySchema = z.object({
 export const CreateQuoteSchema = z.object({
   userName: z.string().optional().describe('Optional display name for the user'),
   reference: z.string().min(1).optional().describe('Full Bible reference string (e.g., "Genesis 1:1-5"). Either this OR the individual fields (startBook, startChapter, startVerse) must be provided, but not both.'),
-  translationSlug: z.string().optional().describe('Translation slug for parsing reference (e.g., "vdcc"). Defaults to "vdcc" if not provided. Only used when reference is provided.'),
   startBook: z.string().min(1).optional().describe('Starting book slug. Required if reference is not provided.'),
   endBook: z.string().optional().describe('Ending book slug (optional if same as startBook)'),
   startChapter: z.number().int().positive().optional().describe('Starting chapter number. Required if reference is not provided.'),
@@ -125,7 +124,7 @@ export const CreateQuoteSchema = z.object({
   startVerse: z.number().int().positive().optional().describe('Starting verse number. Required if reference is not provided.'),
   endVerse: z.number().int().positive().optional().describe('Ending verse number (optional if single verse)'),
   userLanguage: z.string().min(2).max(10).optional().describe('Optional ISO language code (e.g., "ro", "en"). Defaults to "en" if not provided.'),
-  userNote: z.string().min(1).optional().describe('Optional user note or comment about this quote'),
+  userNote: z.string().optional().describe('Optional user note or comment about this quote'),
 }).superRefine((data, ctx) => {
   // Check if both reference and individual fields are provided
   const hasReference = data.reference !== undefined && data.reference !== '';
@@ -181,6 +180,7 @@ export const QuoteSchema = z.object({
   reference: z.string().describe('Full Bible reference string'),
   userLanguage: z.string().describe('ISO language code'),
   userNote: z.string().nullable().describe('Optional user note about this quote'),
+  verses: z.array(VerseSchema).describe('Bible verses for this quote in the requested translation'),
   createdAt: z.string().describe('Creation timestamp'),
   updatedAt: z.string().describe('Last update timestamp'),
   publishedAt: z.string().nullable().describe('Publication timestamp'),
@@ -195,4 +195,28 @@ export const CreateQuoteResponseSchema = SuccessSchema.extend({
 export const PublishedQuotesResponseSchema = SuccessSchema.extend({
   count: z.number().describe('Number of published quotes returned'),
   quotes: z.array(QuoteSchema).describe('List of published quotes'),
+});
+
+export const GetQuotesQuerySchema = z.object({
+  translationSlug: z.string().min(1).describe('Translation slug to filter quotes by (e.g., "vdcc")').openapi({
+    example: 'vdcc',
+  }),
+  startBook: z.string().optional().describe('Filter quotes starting from this book (optional)').openapi({
+    example: 'genesis',
+  }),
+  endBook: z.string().optional().describe('Filter quotes ending at this book (optional)').openapi({
+    example: 'exodus',
+  }),
+  startChapter: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes starting from this chapter (optional)').openapi({
+    example: '1',
+  }),
+  endChapter: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes ending at this chapter (optional)').openapi({
+    example: '5',
+  }),
+  startVerse: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes starting from this verse (optional)').openapi({
+    example: '1',
+  }),
+  endVerse: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes ending at this verse (optional)').openapi({
+    example: '10',
+  }),
 });
