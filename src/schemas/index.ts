@@ -112,3 +112,40 @@ export const PassageQuerySchema = z.object({
     example: '3',
   }),
 });
+
+// Quote schemas
+export const CreateQuoteSchema = z.object({
+  userName: z.string().optional().describe('Optional display name for the user'),
+  reference: z.string().min(1).describe('Full Bible reference string (e.g., "Genesis 1:1-5")'),
+  startBook: z.string().min(1).describe('Starting book slug'),
+  endBook: z.string().optional().describe('Ending book slug (optional if same as startBook)'),
+  startChapter: z.number().int().positive().describe('Starting chapter number'),
+  endChapter: z.number().int().positive().optional().describe('Ending chapter number (optional if same as startChapter)'),
+  startVerse: z.number().int().positive().describe('Starting verse number'),
+  endVerse: z.number().int().positive().optional().describe('Ending verse number (optional if single verse)'),
+  userLanguage: z.string().min(2).max(10).describe('ISO language code (e.g., "ro", "en")'),
+  userNote: z.string().min(1).describe('User\'s note or comment about this quote'),
+  published: z.boolean().default(false).describe('Whether the quote is publicly visible'),
+});
+
+export const QuoteSchema = z.object({
+  id: z.number().describe('Unique quote ID'),
+  userName: z.string().nullable().describe('User display name'),
+  reference: z.string().describe('Full Bible reference string'),
+  userLanguage: z.string().describe('ISO language code'),
+  userNote: z.string().describe('User\'s note about this quote'),
+  createdAt: z.string().describe('Creation timestamp'),
+  updatedAt: z.string().describe('Last update timestamp'),
+  publishedAt: z.string().nullable().describe('Publication timestamp'),
+});
+
+export const CreateQuoteResponseSchema = SuccessSchema.extend({
+  quote: z.object({
+    id: z.number().describe('Created quote ID'),
+  }).describe('Created quote information'),
+});
+
+export const PublishedQuotesResponseSchema = SuccessSchema.extend({
+  count: z.number().describe('Number of published quotes returned'),
+  quotes: z.array(QuoteSchema).describe('List of published quotes'),
+});
