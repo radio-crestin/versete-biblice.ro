@@ -5,6 +5,7 @@ import {createMarkdownFromOpenApi} from '@scalar/openapi-to-markdown';
 import {logger} from 'hono/logger';
 import {cors} from 'hono/cors';
 import {prettyJSON} from 'hono/pretty-json';
+import {cache} from 'hono/cache';
 import {translationsRoute} from './routes/translations.js';
 import {passagesRoute} from './routes/passages.js';
 import {referenceRoute} from './routes/reference.js';
@@ -18,6 +19,43 @@ const app = new OpenAPIHono();
 app.use('*', logger());
 app.use('*', cors());
 app.use('*', prettyJSON());
+
+// Cache middleware for Bible API endpoints
+app.use('/api/v1/bible/translations*', cache({
+    cacheName: 'bible-translations',
+    cacheControl: 'max-age=2592000', // 30 days
+    keyGenerator: (c) => {
+        const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
+        return `${cacheVersion}:${c.req.url}`;
+    },
+}));
+
+app.use('/api/v1/bible/*/passage*', cache({
+    cacheName: 'bible-passages',
+    cacheControl: 'max-age=2592000', // 30 days
+    keyGenerator: (c) => {
+        const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
+        return `${cacheVersion}:${c.req.url}`;
+    },
+}));
+
+app.use('/api/v1/bible/*/reference*', cache({
+    cacheName: 'bible-reference',
+    cacheControl: 'max-age=2592000', // 30 days
+    keyGenerator: (c) => {
+        const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
+        return `${cacheVersion}:${c.req.url}`;
+    },
+}));
+
+app.use('/api/v1/bible/quotes*', cache({
+    cacheName: 'bible-quotes',
+    cacheControl: 'max-age=300', // 5 minutes
+    keyGenerator: (c) => {
+        const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
+        return `${cacheVersion}:${c.req.url}`;
+    },
+}));
 
 // Homepage - check for publica subdomain or serve API docs
 app.get('/', async (c) => {
@@ -84,6 +122,24 @@ You can access AI-readable API documentation at the following URL:
 \`\`\`
 ${baseUrl}/llms.txt
 \`\`\`
+
+
+# Submit a Bible Translation
+Want to contribute a new Bible translation to this API? Here's how:
+
+1. **Prepare your submission:**
+   - Package your Bible translation in a ZIP archive
+   - Include a link or description of the license/copyright notice
+
+2. **Send an email to:** hello@versete-biblice.ro with:
+   - The ZIP archive attached
+   - Bible name, release date and language
+   - License/copyright information
+   - Any relevant translation details
+
+We'll review your submission and get back to you!
+
+
       `,
         },
         servers: [
