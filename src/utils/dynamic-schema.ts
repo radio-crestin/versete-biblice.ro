@@ -1,73 +1,29 @@
-import { db, translations, verses } from '../db/index.js';
-import { sql } from 'drizzle-orm';
 import { BOOK_NAMES } from './book-names.js';
 import { z } from 'zod';
+import translationsData from '../data/translations.json' with { type: 'json' };
 
 /**
- * Cache for dynamic schema data
+ * Load translations from static JSON file (generated at build time)
  */
-let cachedTranslations: string[] = [];
-let cachedLanguages: string[] = [];
-let cachedBookSlugs: string[] = [];
-let initialized = false;
+const translations = translationsData.translations;
+const cachedTranslations = translations.map(t => t.slug);
+const uniqueLanguages = new Set(translations.map(t => t.language));
+const cachedLanguages = Array.from(uniqueLanguages);
+const cachedBookSlugs = Object.values(BOOK_NAMES).map(name =>
+  name.toLowerCase().replace(/\s+/g, '-')
+);
 
 /**
- * Initialize dynamic schema data
- * MUST be called before using any schema functions
- */
-export async function initializeDynamicSchemas(): Promise<void> {
-  if (initialized) {
-    return;
-  }
-
-  // Fetch translations from database
-  const results = await db
-    .select({
-      slug: translations.slug,
-      language: translations.language
-    })
-    .from(translations)
-    .all();
-
-  cachedTranslations = results.map(r => r.slug);
-
-  // Get unique languages
-  const uniqueLanguages = new Set(results.map(r => r.language));
-  cachedLanguages = Array.from(uniqueLanguages);
-
-  // If no translations in DB, use defaults
-  if (cachedTranslations.length === 0) {
-    cachedTranslations = ['vdcc'];
-    cachedLanguages = ['ron', 'eng'];
-  }
-
-  // Get all English book slugs from BOOK_NAMES
-  cachedBookSlugs = Object.values(BOOK_NAMES).map(name =>
-    name.toLowerCase().replace(/\s+/g, '-')
-  );
-
-  initialized = true;
-}
-
-/**
- * Get translation slugs (returns defaults if not initialized)
+ * Get translation slugs
  */
 export function getTranslationSlugs(): string[] {
-  if (!initialized) {
-    // Return default fallback value
-    return ['vdcc'];
-  }
   return cachedTranslations;
 }
 
 /**
- * Get available languages (returns defaults if not initialized)
+ * Get available languages
  */
 export function getLanguages(): string[] {
-  if (!initialized) {
-    // Return default fallback values
-    return ['ron', 'eng'];
-  }
   return cachedLanguages;
 }
 
@@ -75,12 +31,6 @@ export function getLanguages(): string[] {
  * Get all available book slugs (English)
  */
 export function getBookSlugs(): string[] {
-  if (!initialized) {
-    // Return defaults from BOOK_NAMES
-    return Object.values(BOOK_NAMES).map(name =>
-      name.toLowerCase().replace(/\s+/g, '-')
-    );
-  }
   return cachedBookSlugs;
 }
 
@@ -142,12 +92,3 @@ export function createDynamicTranslationsQuerySchema() {
   });
 }
 
-/**
- * Clear cache (useful for testing or when data changes)
- */
-export function clearSchemaCache() {
-  cachedTranslations = [];
-  cachedLanguages = [];
-  cachedBookSlugs = [];
-  initialized = false;
-}

@@ -2,26 +2,18 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPTransport } from '@hono/mcp';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { db, verses, translations } from '../db/index.js';
+import { db, verses } from '../db/index.js';
 import { and, or, eq, gte, lte, sql } from 'drizzle-orm';
 import { parseReference } from '../utils/reference-parser.js';
+import translationsData from '../data/translations.json' with { type: 'json' };
 
 const app = new Hono();
 
 /**
- * Fetch all available translations for documentation
+ * Get all available translations from static JSON
  */
-async function getAllTranslations() {
-  const results = await db
-    .select({
-      slug: translations.slug,
-      language: translations.language,
-      name: translations.name,
-    })
-    .from(translations)
-    .orderBy(translations.language, translations.name);
-
-  return results;
+function getAllTranslations() {
+  return translationsData.translations;
 }
 
 /**
@@ -194,13 +186,45 @@ async function getBiblePassage(translationSlug: string, reference: string) {
 }
 
 // Initialize MCP server
-const translationList = await getAllTranslations();
+const translationList = getAllTranslations();
 const translationDocs = formatTranslationsForDocs(translationList);
 
 const mcpServer = new McpServer({
   name: 'bible-mcp',
   version: '1.0.0',
 });
+
+// Register the get_bible_translations tool
+mcpServer.registerTool(
+  'get_bible_translations',
+  {
+    title: 'Get Available Bible Translations',
+    description: `Get a list of all available Bible translations with their details.
+
+Returns information about each translation including:
+- slug: The translation identifier to use in get_bible_passage
+- language: ISO 639-3 language code (e.g., "ron" for Romanian, "eng" for English)
+- name: Full name of the translation
+
+IMPORTANT: Call this tool first to get the available translation slugs before calling get_bible_passage.`,
+    inputSchema: {},
+  },
+  async () => {
+    const translations = getAllTranslations();
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            success: true,
+            translations,
+            count: translations.length,
+          }, null, 2),
+        },
+      ],
+    };
+  }
+);
 
 // Register the get_bible_passage tool
 mcpServer.registerTool(
@@ -209,8 +233,8 @@ mcpServer.registerTool(
     title: 'Get Bible Passage',
     description: `Get a Bible passage using a natural reference string.
 
-Available translations:
-${translationDocs}
+IMPORTANT: Before calling this tool, call get_bible_translations to get the list of available translation slugs.
+Use the 'slug' value from get_bible_translations as the translationSlug parameter.
 
 Reference format examples:
   - Single verse: "genesis 1:1"
@@ -222,7 +246,7 @@ Reference format examples:
 Books can be specified using English names (genesis, matthew, 1-samuel, song-of-solomon).
 Results are limited to 500 verses maximum.`,
     inputSchema: {
-      translationSlug: z.string().describe(`Translation slug. Available options: ${translationList.map(t => t.slug).join(', ')}`),
+      translationSlug: z.string().describe('Translation slug - call get_bible_translations first to get available options'),
       reference: z.string().describe('Bible reference string (e.g., "genesis 1:1", "john 3:16", "psalm 23")'),
     },
   },

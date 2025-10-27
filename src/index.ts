@@ -5,16 +5,10 @@ import {createMarkdownFromOpenApi} from '@scalar/openapi-to-markdown';
 import {logger} from 'hono/logger';
 import {cors} from 'hono/cors';
 import {prettyJSON} from 'hono/pretty-json';
-import {initializeDynamicSchemas} from './utils/dynamic-schema.js';
-
-// Initialize dynamic schemas BEFORE importing routes (routes need the data)
-await initializeDynamicSchemas();
-
-// Use dynamic imports to ensure routes are loaded AFTER initialization
-const {translationsRoute} = await import('./routes/translations.js');
-const {passagesRoute} = await import('./routes/passages.js');
-const {referenceRoute} = await import('./routes/reference.js');
-const {mcpRoute} = await import('./routes/mcp.js');
+import {translationsRoute} from './routes/translations.js';
+import {passagesRoute} from './routes/passages.js';
+import {referenceRoute} from './routes/reference.js';
+import {mcpRoute} from './routes/mcp.js';
 
 const app = new OpenAPIHono();
 
