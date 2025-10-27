@@ -143,23 +143,3 @@ app.onError((err, c) => {
 
 // Export for Cloudflare Workers
 export default app;
-
-// Start Node.js server for local development
-if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
-    const {serve} = await import('@hono/node-server');
-    const port = parseInt(process.env.PORT || '3005');
-
-    console.log(`🚀 Server starting on port ${port}...`);
-
-    serve({
-        fetch: app.fetch,
-        port,
-    });
-
-    console.log(`✅ Server is running on http://localhost:${port}`);
-    console.log(`📚 API Documentation:`);
-    console.log(`   Scalar (primary): http://localhost:${port}/api/docs`);
-    console.log(`   Swagger UI: http://localhost:${port}/api/swagger`);
-    console.log(`   OpenAPI Spec: http://localhost:${port}/api/doc`);
-    console.log(`   LLMs.txt: http://localhost:${port}/llms.txt`);
-}

@@ -1,7 +1,7 @@
 # Bible MCP Project Guidelines
 
 ## Development
-- Do not run pnpm run dev, a server is already running at localhost:3000
+- Do not run pnpm run dev, a server is already running at http://localhost:8787
 
 ## UI Components & Styling
 
