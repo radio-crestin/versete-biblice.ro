@@ -89,9 +89,54 @@ export const verses = sqliteTable('verses', {
   index('book_name_idx').on(table.bookName),
 ]);
 
+/**
+ * Quotes table - stores user-created Bible quotes with references
+ * Allows users to save and share specific Bible passages with notes
+ */
+export const quotes = sqliteTable('quotes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+
+  // User info
+  clientIp: text('client_ip').notNull(), // IP address of the user creating the quote
+  userName: text('user_name'), // Optional display name
+
+  // Bible reference info
+  reference: text('reference').notNull(), // Full reference string (e.g., "Genesis 1:1-5")
+  startBook: text('start_book', { length: 50 }).notNull(), // Starting book slug
+  endBook: text('end_book', { length: 50 }), // Ending book slug (null if same as startBook)
+  startChapter: integer('start_chapter').notNull(),
+  endChapter: integer('end_chapter'), // Null if same chapter
+  startVerse: integer('start_verse').notNull(),
+  endVerse: integer('end_verse'), // Null if single verse
+
+  // User content
+  userLanguage: text('user_language', { length: 10 }).notNull(), // ISO language code
+  userNote: text('user_note').notNull(), // User's note about this quote
+
+  // Publication status
+  published: integer('published', { mode: 'boolean' }).notNull().default(false),
+
+  // Timestamps
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  publishedAt: text('published_at'), // Timestamp when quote was published
+}, (table) => [
+  // Index for fetching published quotes efficiently
+  index('published_idx').on(table.published, table.publishedAt),
+  // Index for user lookups (e.g., find all quotes by IP)
+  index('client_ip_idx').on(table.clientIp),
+  // Index for language filtering
+  index('user_language_idx').on(table.userLanguage),
+  // Composite index for published quotes ordered by publication date
+  index('published_date_idx').on(table.published, table.publishedAt),
+]);
+
 // Type exports for TypeScript
 export type Translation = typeof translations.$inferSelect;
 export type NewTranslation = typeof translations.$inferInsert;
 
 export type Verse = typeof verses.$inferSelect;
 export type NewVerse = typeof verses.$inferInsert;
+
+export type Quote = typeof quotes.$inferSelect;
+export type NewQuote = typeof quotes.$inferInsert;

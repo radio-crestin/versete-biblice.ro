@@ -15,6 +15,13 @@
       "when": 1761579791068,
       "tag": "0001_quick_red_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1761593756360,
+      "tag": "0002_charming_baron_zemo",
+      "breakpoints": true
     }
   ]
 }
