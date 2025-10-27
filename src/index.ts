@@ -10,6 +10,7 @@ import {passagesRoute} from './routes/passages.js';
 import {referenceRoute} from './routes/reference.js';
 import {quotesRoute} from './routes/quotes.js';
 import mcpRoute from './routes/mcp.js';
+import {publicFormRoute} from './routes/public-form.js';
 
 const app = new OpenAPIHono();
 
@@ -18,10 +19,21 @@ app.use('*', logger());
 app.use('*', cors());
 app.use('*', prettyJSON());
 
-// Homepage - redirect to API docs
+// Homepage - check for publica subdomain or serve API docs
 app.get('/', (c) => {
+    const url = new URL(c.req.url);
+    const hostname = url.hostname;
+
+    // Check if accessed via publica subdomain
+    if (hostname.startsWith('publica.')) {
+        return c.redirect('/publica');
+    }
+
     return c.redirect('/api/docs');
 });
+
+// Public form route - accessible at /publica or publica.versete-biblice.ro
+app.route('/publica', publicFormRoute);
 
 // API v1 Routes - Bible
 app.route('/api/v1/bible/translations', translationsRoute);
