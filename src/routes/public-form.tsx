@@ -124,7 +124,12 @@ app.get('/', (c) => {
                   </p>
                 </div>
 
-                <div class="flex justify-between gap-3">
+                <!-- Error Message for Step 1 -->
+                <div id="error-message-step-1" class="hidden bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p class="text-sm text-red-800">Te rugăm să introduci un nume sau să continui ca anonim.</p>
+                </div>
+
+                <div class="flex justify-end gap-3">
                   <button
                     type="button"
                     id="continue-anonymous"
@@ -234,18 +239,18 @@ app.get('/', (c) => {
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex justify-between gap-3">
+                <div class="flex justify-end gap-3">
                   <button
                     type="button"
                     id="back-step-2"
-                    class="btn-secondary px-4 sm:px-6 py-2.5 rounded-lg font-medium flex-shrink-0"
+                    class="btn-secondary px-4 sm:px-6 py-2.5 rounded-lg font-medium"
                   >
                     ← Înapoi
                   </button>
                   <button
                     type="submit"
                     id="submit-button"
-                    class="btn-primary px-4 sm:px-6 py-2.5 rounded-lg font-medium flex-1"
+                    class="btn-primary px-4 sm:px-6 py-2.5 rounded-lg font-medium"
                   >
                     Publică versetul
                   </button>
@@ -326,6 +331,7 @@ app.get('/', (c) => {
           const quoteForm = document.getElementById('quote-form');
           const loadingState = document.getElementById('loading-state');
           const errorMessage = document.getElementById('error-message');
+          const errorMessageStep1 = document.getElementById('error-message-step-1');
           const submitAnotherBtn = document.getElementById('submit-another');
           const verseCountMessage = document.getElementById('verse-count-message');
 
@@ -355,11 +361,13 @@ app.get('/', (c) => {
           nextStep1Btn.addEventListener('click', () => {
             const name = userNameInput.value.trim();
             if (!name) {
+              errorMessageStep1.classList.remove('hidden');
               userNameInput.focus();
               return;
             }
 
-            // Save name to cookie
+            // Hide error and save name to cookie
+            errorMessageStep1.classList.add('hidden');
             setCookie('userName', name);
 
             // Move to step 2
@@ -370,6 +378,7 @@ app.get('/', (c) => {
 
           // Continue as anonymous
           continueAnonymousBtn.addEventListener('click', () => {
+            errorMessageStep1.classList.add('hidden');
             setCookie('userName', 'anonymous');
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
