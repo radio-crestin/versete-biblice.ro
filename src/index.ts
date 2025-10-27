@@ -10,6 +10,7 @@ import {translationsRoute} from './routes/translations.js';
 import {passagesRoute} from './routes/passages.js';
 import {referenceRoute} from './routes/reference.js';
 import {quotesRoute} from './routes/quotes.js';
+import {dailyVerseRoute} from './routes/daily-verse.js';
 import {dailyVersesRoute} from './routes/daily-verses.js';
 import mcpRoute from './routes/mcp.js';
 import {publicFormRoute} from './routes/public-form.js';
@@ -100,7 +101,7 @@ app.route('/api/v1/bible/translations', translationsRoute);
 app.route('/api/v1/bible', passagesRoute);
 app.route('/api/v1/bible', referenceRoute);
 app.route('/api/v1/bible/quotes', quotesRoute);
-app.route('/api/v1/bible/daily-verse', dailyVersesRoute);
+app.route('/api/v1/bible/daily-verse', dailyVerseRoute);
 app.route('/api/v1/bible/daily-verses', dailyVersesRoute);
 
 // MCP Server Route
@@ -160,6 +161,11 @@ Want to contribute a new Bible translation to this API? Here's how:
    - Any relevant translation details
 
 We'll review your submission and get back to you!
+
+
+# Contribute on GitHub
+This is an open-source project! If you want to contribute, check out the repository here:
+[https://github.com/radio-crestin/versete-biblice.ro](https://github.com/radio-crestin/versete-biblice.ro)
 
 
       `,

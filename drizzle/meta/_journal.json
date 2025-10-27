@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1761567506120,
-      "tag": "0000_awesome_echo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1761579791068,
-      "tag": "0001_quick_red_skull",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1761593756360,
-      "tag": "0002_charming_baron_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1761595504518,
-      "tag": "0003_blue_shocker",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1761596730285,
-      "tag": "0004_open_cobalt_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1761597171040,
-      "tag": "0005_neat_shriek",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1761597747026,
-      "tag": "0006_wet_mikhail_rasputin",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1761598575019,
-      "tag": "0007_greedy_gladiator",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "6",
-      "when": 1761600989262,
-      "tag": "0008_safe_living_mummy",
+      "when": 1761608416835,
+      "tag": "0000_bored_maximus",
       "breakpoints": true
     }
   ]

@@ -220,3 +220,22 @@ export const GetQuotesQuerySchema = z.object({
     example: '10',
   }),
 });
+
+// Daily Verse schemas
+export const DailyVerseSchema = z.object({
+  date: z.string().describe('Date for this daily verse (YYYY-MM-DD)'),
+  reference: z.string().describe('Full Bible reference string'),
+  verses: z.array(VerseSchema).describe('Bible verses for this daily verse in the requested translation'),
+});
+
+export const DailyVerseResponseSchema = SuccessSchema.extend({
+  dailyVerse: DailyVerseSchema.describe('Daily verse details'),
+});
+
+export const DailyVersesResponseSchema = SuccessSchema.extend({
+  count: z.number().describe('Number of daily verses returned'),
+  dailyVerses: z.array(DailyVerseSchema).describe('List of daily verses'),
+});
+
+// Note: Daily verse query schemas are now dynamically generated in utils/dynamic-schema.ts
+// to include translation slugs from translations.json

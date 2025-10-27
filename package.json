@@ -5,11 +5,10 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "dev:wrangler": "wrangler dev",
+    "dev:wrangler": "dotenv -e .env -- wrangler dev",
     "db:generate": "drizzle-kit generate",
     "db:push": "dotenv -e .env -- drizzle-kit push",
     "db:push:production": "dotenv -e .env.production -- drizzle-kit push",
-    "db:migrate:production": "dotenv -e .env.production -- tsx scripts/apply-production-migration.ts",
     "db:studio": "drizzle-kit studio",
     "upload:translation": "dotenv -e .env -- tsx src/scripts/upload-translation.ts bibles/raw/ron-rccv.usfx.xml vdcc",
     "generate:docs-options": "dotenv -e .env -- tsx scripts/generate-docs-options.ts",

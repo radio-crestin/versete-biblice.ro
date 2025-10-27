@@ -133,6 +133,63 @@ export const quotes = sqliteTable('quotes', {
   index('published_book_chapter_verse_idx').on(table.published, table.startBook, table.startChapter, table.startVerse, table.publishedAt),
 ]);
 
+/**
+ * Daily Verse Pool table - stores the pool of Bible verses that can be scheduled
+ * Used for the daily verse feature to maintain a collection of verses to rotate through
+ */
+export const dailyVersePool = sqliteTable('daily_verse_pool', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+
+  // Bible reference info (translation-agnostic, similar to quotes)
+  startBook: text('start_book', { length: 50 }).notNull(), // Starting book slug
+  startChapter: integer('start_chapter').notNull(),
+  startVerse: integer('start_verse').notNull(),
+  endBook: text('end_book', { length: 50 }).notNull(), // Ending book slug
+  endChapter: integer('end_chapter').notNull(),
+  endVerse: integer('end_verse').notNull(),
+
+  // Optional preferred publication date (MM-DD format, e.g., "12-25" for Christmas)
+  publishDate: text('publish_date', { length: 5 }), // Format: "MM-DD"
+
+  // Scheduling metadata
+  lastScheduledAt: text('last_scheduled_at'), // Timestamp of last scheduling
+  scheduleCount: integer('schedule_count').notNull().default(0), // Total times this verse has been scheduled
+
+  // Timestamps
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  // Index for verses with specific publish dates
+  index('publish_date_idx').on(table.publishDate),
+  // Index for scheduling algorithm (find least recently scheduled)
+  index('last_scheduled_idx').on(table.lastScheduledAt),
+  index('schedule_count_idx').on(table.scheduleCount),
+]);
+
+/**
+ * Daily Verse Scheduled table - stores the scheduled verses for specific dates
+ * Maps dates to verses from the pool
+ */
+export const dailyVerseScheduled = sqliteTable('daily_verse_scheduled', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+
+  // Date for this scheduled verse (YYYY-MM-DD format)
+  date: text('date').notNull().unique(), // e.g., "2025-12-25"
+
+  // Foreign key to the verse pool
+  versePoolId: integer('verse_pool_id').notNull().references(() => dailyVersePool.id, { onDelete: 'cascade' }),
+
+  // Timestamp
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  // Unique index on date (only one verse per day)
+  uniqueIndex('unique_date_idx').on(table.date),
+  // Index for date range queries
+  index('date_idx').on(table.date),
+  // Index for verse pool lookups
+  index('verse_pool_idx').on(table.versePoolId),
+]);
+
 // Type exports for TypeScript
 export type Translation = typeof translations.$inferSelect;
 export type NewTranslation = typeof translations.$inferInsert;
@@ -142,3 +199,9 @@ export type NewVerse = typeof verses.$inferInsert;
 
 export type Quote = typeof quotes.$inferSelect;
 export type NewQuote = typeof quotes.$inferInsert;
+
+export type DailyVersePool = typeof dailyVersePool.$inferSelect;
+export type NewDailyVersePool = typeof dailyVersePool.$inferInsert;
+
+export type DailyVerseScheduled = typeof dailyVerseScheduled.$inferSelect;
+export type NewDailyVerseScheduled = typeof dailyVerseScheduled.$inferInsert;
