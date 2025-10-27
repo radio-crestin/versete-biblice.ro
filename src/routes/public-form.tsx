@@ -124,20 +124,20 @@ app.get('/', (c) => {
                   </p>
                 </div>
 
-                <div class="flex flex-col gap-3">
-                  <button
-                    type="button"
-                    id="next-step-1"
-                    class="btn-primary w-full px-6 py-2.5 rounded-lg font-medium"
-                  >
-                    Continuă →
-                  </button>
+                <div class="flex justify-between gap-3">
                   <button
                     type="button"
                     id="continue-anonymous"
-                    class="btn-ghost w-full px-6 py-2.5 rounded-lg font-medium"
+                    class="btn-ghost px-4 sm:px-6 py-2.5 rounded-lg font-medium"
                   >
                     Continuă ca anonim
+                  </button>
+                  <button
+                    type="button"
+                    id="next-step-1"
+                    class="btn-primary px-4 sm:px-6 py-2.5 rounded-lg font-medium"
+                  >
+                    Continuă
                   </button>
                 </div>
               </div>
