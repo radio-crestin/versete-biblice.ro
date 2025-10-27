@@ -246,7 +246,7 @@ Results are limited to 500 verses maximum.`,
         }
     },
   async ({ bibleTranslationSlug, reference }): Promise<CallToolResult> => {
-    console.log('get_bible_passage called with args:', bibleTranslationSlug, reference);
+    console.debug('get_bible_passage called with args:', bibleTranslationSlug, reference);
     const result = await getBiblePassage(bibleTranslationSlug, reference);
     return {
       content: [

@@ -129,16 +129,16 @@ export function createDynamicGetQuotesQuerySchema() {
     offset: z.string().regex(/^\d+$/).default('0').transform(Number).describe('Number of quotes to skip for pagination (default: 0)').openapi({
       example: '0',
     }),
-    publishedAtGt: z.string().datetime().optional().describe('Filter quotes published after this date (ISO 8601 format)').openapi({
+    publishedAtGt: z.coerce.date().optional().describe('Filter quotes published after this date (ISO 8601 format)').openapi({
       example: '2025-01-01T00:00:00Z',
     }),
-    publishedAtGte: z.string().datetime().optional().describe('Filter quotes published on or after this date (ISO 8601 format)').openapi({
+    publishedAtGte: z.coerce.date().optional().describe('Filter quotes published on or after this date (ISO 8601 format)').openapi({
       example: '2025-01-01T00:00:00Z',
     }),
-    publishedAtLt: z.string().datetime().optional().describe('Filter quotes published before this date (ISO 8601 format)').openapi({
+    publishedAtLt: z.coerce.date().optional().describe('Filter quotes published before this date (ISO 8601 format)').openapi({
       example: '2025-12-31T23:59:59Z',
     }),
-    publishedAtLte: z.string().datetime().optional().describe('Filter quotes published on or before this date (ISO 8601 format)').openapi({
+    publishedAtLte: z.coerce.date().optional().describe('Filter quotes published on or before this date (ISO 8601 format)').openapi({
       example: '2025-12-31T23:59:59Z',
     }),
   });

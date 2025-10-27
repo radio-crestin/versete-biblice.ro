@@ -66,31 +66,32 @@ const getAllTranslationsRoute = createRoute({
 });
 
 app.openapi(getAllTranslationsRoute, async (c) => {
-  const { language } = c.req.valid('query');
+    const { language } = c.req.valid('query');
 
-  try {
-    let results;
+    try {
+      let results;
 
-    if (language !== undefined) {
-      // Filter by language
-      results = await db
-        .select()
-        .from(translations)
-        .where(eq(translations.language, language));
-    } else {
-      // Get translations
-      results = await db.select().from(translations);
+      if (language !== undefined) {
+        // Filter by language
+        results = await db
+          .select()
+          .from(translations)
+          .where(eq(translations.language, language));
+      } else {
+        // Get translations
+        results = await db.select().from(translations);
+      }
+
+      return c.json({
+        success: true,
+        count: results.length,
+        translations: results,
+      }, 200);
+    } catch (error) {
+      console.error('Error fetching translations:', error);
+      return c.json({ success: false, error: 'Failed to fetch translations' }, 500);
     }
-
-    return c.json({
-      success: true,
-      count: results.length,
-      translations: results,
-    }, 200);
-  } catch (error) {
-    console.error('Error fetching translations:', error);
-    return c.json({ success: false, error: 'Failed to fetch translations' }, 500);
   }
-});
+);
 
 export { app as translationsRoute };

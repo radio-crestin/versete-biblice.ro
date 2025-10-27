@@ -87,7 +87,7 @@ export function getMaxVersesForChapter(bookSlug: string, chapter: number): numbe
   // This is a simplified approach - returning a reasonable max
   // In a real app, you'd have exact verse counts stored
   const book = ROMANIAN_BIBLE_BOOKS.find(b => b.slug === bookSlug);
-  if (!book) {return 100;}
+  if (book === undefined) {return 100;}
 
   // Most chapters have fewer than 100 verses
   // Psalms 119 has 176 verses (the longest)

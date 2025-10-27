@@ -46,6 +46,22 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/routes/**/*.ts'],
+    rules: {
+      // Relax type safety rules for route files due to Hono middleware+OpenAPI type inference limitations
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
+      '@typescript-eslint/ban-ts-comment': ['error', {
+        'ts-ignore': 'allow-with-description',
+      }],
+    },
+  },
+  {
     ignores: [
       'node_modules/**',
       'dist/**',

@@ -103,13 +103,13 @@ const getPassageRoute = createRoute({
 });
 
 app.openapi(getPassageRoute, async (c) => {
-  const { bibleTranslationSlug } = c.req.valid('param');
-  const { book, chapter, verse, endBook, endChapter, endVerse } = c.req.valid('query');
+    const { bibleTranslationSlug } = c.req.valid('param');
+    const { book, chapter, verse, endBook, endChapter, endVerse } = c.req.valid('query');
 
-  const startBook = book.toLowerCase();
-  const finalEndBook = (endBook ?? '').toLowerCase() !== '' ? (endBook ?? '').toLowerCase() : startBook;
-  const finalEndChapter = endChapter ?? chapter;
-  const finalEndVerse = endVerse ?? verse;
+    const startBook = book.toLowerCase();
+    const finalEndBook = (endBook ?? '').toLowerCase() !== '' ? (endBook ?? '').toLowerCase() : startBook;
+    const finalEndChapter = endChapter ?? chapter;
+    const finalEndVerse = endVerse ?? verse;
 
   try {
     // Helper function to create book filter

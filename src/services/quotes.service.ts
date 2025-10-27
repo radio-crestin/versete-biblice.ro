@@ -93,7 +93,7 @@ function buildVerseRangeCondition(
           lte(verses.verse, endVerse)
         )
       );
-      if (orCondition !== undefined && orCondition !== null) {
+      if (orCondition !== undefined) {
         conditions.push(orCondition);
       }
     }
@@ -127,16 +127,12 @@ function buildVerseRangeCondition(
       )
     );
 
-    if (crossBookOr !== undefined && crossBookOr !== null) {
+    if (crossBookOr !== undefined) {
       conditions.push(crossBookOr);
     }
   }
 
-  const finalCondition = and(...conditions);
-  if (finalCondition === undefined || finalCondition === null) {
-    throw new Error('Failed to build verse range condition');
-  }
-  return finalCondition;
+  return and(...conditions);
 }
 
 /**
@@ -253,11 +249,6 @@ export async function getPublishedQuotes(
   // Fetch verses for all quotes in a single query using OR conditions
   const verseConditions = quotesData.map(quote => buildVerseRangeCondition(quote, bibleTranslationSlug));
 
-  const verseOrCondition = or(...verseConditions);
-  if (verseOrCondition === undefined || verseOrCondition === null) {
-    return [];
-  }
-
   const allVerses = await db
     .select({
       bookSlug: verses.bookSlug,
@@ -267,7 +258,7 @@ export async function getPublishedQuotes(
       text: verses.text,
     })
     .from(verses)
-    .where(verseOrCondition);
+    .where(or(...verseConditions));
 
   // Group verses by quote
   const result = quotesData.map(quote => {

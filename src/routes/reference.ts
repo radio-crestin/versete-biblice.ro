@@ -113,10 +113,10 @@ Books can be specified using English slugs (genesis, matthew, 1-samuel) or local
 });
 
 app.openapi(getReferenceRoute, async (c) => {
-  const { bibleTranslationSlug } = c.req.valid('param');
-  const { reference } = c.req.valid('query');
+    const { bibleTranslationSlug } = c.req.valid('param');
+    const { reference } = c.req.valid('query');
 
-  try {
+    try {
     // Parse the reference string
     const parsed = await parseReference(reference, bibleTranslationSlug);
 

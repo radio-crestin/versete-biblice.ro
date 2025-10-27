@@ -21,7 +21,7 @@ app.use('*', cors());
 app.use('*', prettyJSON());
 
 // Cache middleware for Bible API endpoints
-app.use('/api/v1/bible/translations*', cache({
+app.get('/api/v1/bible/translations*', cache({
     cacheName: 'bible-translations',
     cacheControl: 'max-age=2592000', // 30 days
     keyGenerator: (c) => {
@@ -30,7 +30,7 @@ app.use('/api/v1/bible/translations*', cache({
     },
 }));
 
-app.use('/api/v1/bible/*/passage*', cache({
+app.get('/api/v1/bible/*/passage*', cache({
     cacheName: 'bible-passages',
     cacheControl: 'max-age=2592000', // 30 days
     keyGenerator: (c) => {
@@ -39,7 +39,7 @@ app.use('/api/v1/bible/*/passage*', cache({
     },
 }));
 
-app.use('/api/v1/bible/*/reference*', cache({
+app.get('/api/v1/bible/*/reference*', cache({
     cacheName: 'bible-reference',
     cacheControl: 'max-age=2592000', // 30 days
     keyGenerator: (c) => {
@@ -48,7 +48,7 @@ app.use('/api/v1/bible/*/reference*', cache({
     },
 }));
 
-app.use('/api/v1/bible/quotes*', cache({
+app.get('/api/v1/bible/quotes*', cache({
     cacheName: 'bible-quotes',
     cacheControl: 'max-age=300', // 5 minutes
     keyGenerator: (c) => {

@@ -320,33 +320,34 @@ const getPublishedQuotesRoute = createRoute({
 });
 
 app.openapi(getPublishedQuotesRoute, async (c) => {
-  try {
-    const query = c.req.valid('query');
+    try {
+      const query = c.req.valid('query');
 
-    const results = await getPublishedQuotes(query.bibleTranslationSlug, {
-      startBook: query.startBook,
-      endBook: query.endBook,
-      startChapter: query.startChapter,
-      endChapter: query.endChapter,
-      startVerse: query.startVerse,
-      endVerse: query.endVerse,
-      limit: query.limit,
-      offset: query.offset,
-      publishedAtGt: query.publishedAtGt,
-      publishedAtGte: query.publishedAtGte,
-      publishedAtLt: query.publishedAtLt,
-      publishedAtLte: query.publishedAtLte,
-    });
+      const results = await getPublishedQuotes(query.bibleTranslationSlug, {
+        startBook: query.startBook,
+        endBook: query.endBook,
+        startChapter: query.startChapter,
+        endChapter: query.endChapter,
+        startVerse: query.startVerse,
+        endVerse: query.endVerse,
+        limit: query.limit,
+        offset: query.offset,
+        publishedAtGt: query.publishedAtGt?.toISOString(),
+        publishedAtGte: query.publishedAtGte?.toISOString(),
+        publishedAtLt: query.publishedAtLt?.toISOString(),
+        publishedAtLte: query.publishedAtLte?.toISOString(),
+      });
 
-    return c.json({
-      success: true,
-      count: results.length,
-      quotes: results,
-    }, 200);
-  } catch (error) {
-    console.error('Error fetching published quotes:', error);
-    return c.json({ success: false, error: 'Failed to fetch published quotes' }, 500);
+      return c.json({
+        success: true,
+        count: results.length,
+        quotes: results,
+      }, 200);
+    } catch (error) {
+      console.error('Error fetching published quotes:', error);
+      return c.json({ success: false, error: 'Failed to fetch published quotes' }, 500);
+    }
   }
-});
+);
 
 export { app as quotesRoute };
