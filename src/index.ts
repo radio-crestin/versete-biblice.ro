@@ -10,8 +10,10 @@ import {translationsRoute} from './routes/translations.js';
 import {passagesRoute} from './routes/passages.js';
 import {referenceRoute} from './routes/reference.js';
 import {quotesRoute} from './routes/quotes.js';
+import {dailyVersesRoute} from './routes/daily-verses.js';
 import mcpRoute from './routes/mcp.js';
 import {publicFormRoute} from './routes/public-form.js';
+import {ensureScheduledVerses} from './services/daily-verses.service.js';
 
 const app = new OpenAPIHono();
 
@@ -21,39 +23,57 @@ app.use('*', cors());
 app.use('*', prettyJSON());
 
 // Cache middleware for Bible API endpoints
-app.get('/api/v1/bible/translations*', cache({
+app.get('/api/v1/bible/translations', cache({
     cacheName: 'bible-translations',
-    cacheControl: 'max-age=2592000', // 30 days
+    cacheControl: 'public, s-maxage=3600, max-age=0, must-revalidate', // 1 hour
     keyGenerator: (c) => {
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
-        return `${cacheVersion}:${c.req.url}`;
+        return `${c.req.url}:${cacheVersion}`;
     },
 }));
 
-app.get('/api/v1/bible/*/passage*', cache({
+app.get('/api/v1/bible/*/passage', cache({
     cacheName: 'bible-passages',
-    cacheControl: 'max-age=2592000', // 30 days
+    cacheControl: 'public, s-maxage=2592000, max-age=0, must-revalidate', // 30 days
     keyGenerator: (c) => {
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
-        return `${cacheVersion}:${c.req.url}`;
+        return `${c.req.url}:${cacheVersion}`;
     },
 }));
 
-app.get('/api/v1/bible/*/reference*', cache({
+app.get('/api/v1/bible/*/reference', cache({
     cacheName: 'bible-reference',
-    cacheControl: 'max-age=2592000', // 30 days
+    cacheControl: 'public, s-maxage=2592000, max-age=0, must-revalidate', // 30 days
     keyGenerator: (c) => {
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
-        return `${cacheVersion}:${c.req.url}`;
+        return `${c.req.url}:${cacheVersion}`;
     },
 }));
 
-app.get('/api/v1/bible/quotes*', cache({
+app.get('/api/v1/bible/quotes', cache({
     cacheName: 'bible-quotes',
-    cacheControl: 'max-age=300', // 5 minutes
+    cacheControl: 'public, s-maxage=300, max-age=0, must-revalidate', // 5 minutes
     keyGenerator: (c) => {
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
-        return `${cacheVersion}:${c.req.url}`;
+        return `${c.req.url}:${cacheVersion}`;
+    },
+}));
+
+app.get('/api/v1/bible/daily-verse', cache({
+    cacheName: 'bible-daily-verse',
+    cacheControl: 'public, s-maxage=3600, max-age=0, must-revalidate', // 1 hour
+    keyGenerator: (c) => {
+        const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
+        return `${c.req.url}:${cacheVersion}`;
+    },
+}));
+
+app.get('/api/v1/bible/daily-verses', cache({
+    cacheName: 'bible-daily-verses',
+    cacheControl: 'public, s-maxage=3600, max-age=0, must-revalidate', // 1 hour
+    keyGenerator: (c) => {
+        const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
+        return `${c.req.url}:${cacheVersion}`;
     },
 }));
 
@@ -80,6 +100,8 @@ app.route('/api/v1/bible/translations', translationsRoute);
 app.route('/api/v1/bible', passagesRoute);
 app.route('/api/v1/bible', referenceRoute);
 app.route('/api/v1/bible/quotes', quotesRoute);
+app.route('/api/v1/bible/daily-verse', dailyVersesRoute);
+app.route('/api/v1/bible/daily-verses', dailyVersesRoute);
 
 // MCP Server Route
 app.route('/api/v1', mcpRoute);
@@ -161,6 +183,10 @@ We'll review your submission and get back to you!
                 name: 'Bible Quotes',
                 description: 'User-generated Bible quotes with notes',
             },
+            {
+                name: 'Daily Bible Verses',
+                description: 'Daily Bible verse scheduling and retrieval',
+            },
         ],
     };
 });
@@ -221,6 +247,19 @@ app.onError((err, c) => {
     console.error('Server error:', err);
     return c.json({error: 'Internal Server Error', message: err.message}, 500);
 });
+
+// Scheduled event handler for cron triggers
+export const scheduled = async (_event: unknown, _env: unknown, _ctx: unknown): Promise<void> => {
+    console.info('Cron trigger fired for daily verses scheduling');
+
+    try {
+        // Ensure verses are scheduled for the next 2 months (first run) or next month (subsequent runs)
+        await ensureScheduledVerses();
+        console.info('Daily verses scheduling completed successfully');
+    } catch (error) {
+        console.error('Error during scheduled verses update:', error);
+    }
+};
 
 // Export for Cloudflare Workers
 export default app;

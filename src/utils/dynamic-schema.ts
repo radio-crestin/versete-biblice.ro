@@ -144,3 +144,38 @@ export function createDynamicGetQuotesQuerySchema() {
   });
 }
 
+/**
+ * Create dynamic GetDailyVerseQuerySchema with actual translation slugs
+ */
+export function createDynamicGetDailyVerseQuerySchema() {
+  const translationSlugs = getTranslationSlugs();
+
+  return z.object({
+    bibleTranslationSlug: z.enum(translationSlugs as [string, ...string[]]).describe('Translation slug (e.g., "vdcc")').openapi({
+      example: translationSlugs[0] ?? 'vdcc',
+    }),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe('Date for the daily verse (YYYY-MM-DD). Defaults to today if not provided.').openapi({
+      example: '2025-12-25',
+    }),
+  });
+}
+
+/**
+ * Create dynamic GetDailyVersesQuerySchema with actual translation slugs
+ */
+export function createDynamicGetDailyVersesQuerySchema() {
+  const translationSlugs = getTranslationSlugs();
+
+  return z.object({
+    bibleTranslationSlug: z.enum(translationSlugs as [string, ...string[]]).describe('Translation slug (e.g., "vdcc")').openapi({
+      example: translationSlugs[0] ?? 'vdcc',
+    }),
+    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe('Start date for range query (YYYY-MM-DD)').openapi({
+      example: '2025-12-01',
+    }),
+    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe('End date for range query (YYYY-MM-DD)').openapi({
+      example: '2025-12-31',
+    }),
+  });
+}
+
