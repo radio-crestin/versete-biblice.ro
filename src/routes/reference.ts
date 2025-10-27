@@ -19,7 +19,7 @@ const ReferenceQuerySchema = z.object({
 
 const getReferenceRoute = createRoute({
   method: 'get',
-  path: '/{translationSlug}/reference',
+  path: '/{bibleTranslationSlug}/reference',
   operationId: 'getReference',
   tags: ['Bible API'],
   summary: 'Get a Bible passage by reference string',
@@ -44,7 +44,7 @@ Books can be specified using English slugs (genesis, matthew, 1-samuel) or local
           schema: PassageResponseSchema,
           example: {
             success: true,
-            translationSlug: 'vdcc',
+            bibleTranslationSlug: 'vdcc',
             translationId: 1,
             start: {
               book: 'genesis',
@@ -113,12 +113,12 @@ Books can be specified using English slugs (genesis, matthew, 1-samuel) or local
 });
 
 app.openapi(getReferenceRoute, async (c) => {
-  const { translationSlug } = c.req.valid('param');
+  const { bibleTranslationSlug } = c.req.valid('param');
   const { reference } = c.req.valid('query');
 
   try {
     // Parse the reference string
-    const parsed = await parseReference(reference, translationSlug);
+    const parsed = await parseReference(reference, bibleTranslationSlug);
 
     if (parsed === null) {
       return c.json(
@@ -153,7 +153,7 @@ app.openapi(getReferenceRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             eq(verses.chapter, chapter),
             eq(verses.verse, verse)
@@ -167,7 +167,7 @@ app.openapi(getReferenceRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             eq(verses.chapter, chapter),
             gte(verses.verse, verse),
@@ -182,7 +182,7 @@ app.openapi(getReferenceRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             or(
               // Start chapter: from start verse onwards
@@ -206,7 +206,7 @@ app.openapi(getReferenceRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             or(
               // Start book: from start chapter/verse onwards
               and(
@@ -246,7 +246,7 @@ app.openapi(getReferenceRoute, async (c) => {
 
     return c.json({
       success: true,
-      translationSlug,
+      bibleTranslationSlug,
       translationId: firstVerse.translationId,
       start: {
         book: startBook,

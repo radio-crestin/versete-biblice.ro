@@ -59,7 +59,7 @@ function cleanReference(reference: string): string {
  */
 async function parseBookFromReference(
   bookPart: string,
-  translationSlug: string
+  bibleTranslationSlug: string
 ): Promise<string | null> {
   const normalizedBookPart = normalizeForComparison(bookPart);
   const normalizedForPartial = normalizeForPartialMatch(bookPart);
@@ -87,7 +87,7 @@ async function parseBookFromReference(
   const result = await db
     .select({ bookSlug: verses.bookSlug, bookName: verses.bookName })
     .from(verses)
-    .where(sql`${verses.translationSlug} = ${translationSlug}`)
+    .where(sql`${verses.bibleTranslationSlug} = ${bibleTranslationSlug}`)
     .groupBy(verses.bookSlug, verses.bookName);
 
   // Try exact match on normalized localized book names
@@ -129,7 +129,7 @@ async function parseBookFromReference(
  */
 async function parseReferencePart(
   part: string,
-  translationSlug: string
+  bibleTranslationSlug: string
 ): Promise<{ book: string; chapter: number; verse: number } | null> {
   // Match pattern: "book chapter:verse"
   // This regex handles multi-word books like "1 samuel" or "song of solomon"
@@ -141,7 +141,7 @@ async function parseReferencePart(
   }
 
   const [, bookPart, chapterStr, verseStr] = match;
-  const book = await parseBookFromReference(bookPart, translationSlug);
+  const book = await parseBookFromReference(bookPart, bibleTranslationSlug);
 
   if (book === null || book === '') {
     return null;
@@ -184,12 +184,12 @@ function parseChapterVerse(part: string): { chapter: number; verse: number } | n
  * - Alternative separators: "-", "to", "->"
  *
  * @param reference The reference string to parse
- * @param translationSlug The translation slug for book name resolution
+ * @param bibleTranslationSlug The translation slug for book name resolution
  * @returns Parsed reference or null if invalid
  */
 export async function parseReference(
   reference: string,
-  translationSlug: string
+  bibleTranslationSlug: string
 ): Promise<ParsedReference | null> {
   const cleaned = cleanReference(reference);
 
@@ -201,7 +201,7 @@ export async function parseReference(
   }
 
   // Parse the start reference
-  const startPart = await parseReferencePart(parts[0], translationSlug);
+  const startPart = await parseReferencePart(parts[0], bibleTranslationSlug);
   if (startPart === null) {
     return null;
   }
@@ -219,7 +219,7 @@ export async function parseReference(
   const endPartRaw = parts[1];
 
   // Try to parse as full reference (book chapter:verse)
-  const endPartFull = await parseReferencePart(endPartRaw, translationSlug);
+  const endPartFull = await parseReferencePart(endPartRaw, bibleTranslationSlug);
   if (endPartFull !== null) {
     // Cross-book or explicit book range
     return {

@@ -18,7 +18,7 @@ const PassageQuerySchema = createDynamicPassageQuerySchema();
 
 const getPassageRoute = createRoute({
   method: 'get',
-  path: '/{translationSlug}/passage',
+  path: '/{bibleTranslationSlug}/passage',
   operationId: 'getPassage',
   tags: ['Bible API'],
   summary: 'Get a Bible passage',
@@ -34,7 +34,7 @@ const getPassageRoute = createRoute({
           schema: PassageResponseSchema,
           example: {
             success: true,
-            translationSlug: 'vdcc',
+            bibleTranslationSlug: 'vdcc',
             translationId: 1,
             start: {
               book: 'geneza',
@@ -103,7 +103,7 @@ const getPassageRoute = createRoute({
 });
 
 app.openapi(getPassageRoute, async (c) => {
-  const { translationSlug } = c.req.valid('param');
+  const { bibleTranslationSlug } = c.req.valid('param');
   const { book, chapter, verse, endBook, endChapter, endVerse } = c.req.valid('query');
 
   const startBook = book.toLowerCase();
@@ -128,7 +128,7 @@ app.openapi(getPassageRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             eq(verses.chapter, chapter),
             eq(verses.verse, verse)
@@ -142,7 +142,7 @@ app.openapi(getPassageRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             eq(verses.chapter, chapter),
             gte(verses.verse, verse),
@@ -157,7 +157,7 @@ app.openapi(getPassageRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             or(
               // Start chapter: from start verse onwards
@@ -181,7 +181,7 @@ app.openapi(getPassageRoute, async (c) => {
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             or(
               // Start book: from start chapter/verse onwards
               and(
@@ -218,7 +218,7 @@ app.openapi(getPassageRoute, async (c) => {
 
     return c.json({
       success: true,
-      translationSlug,
+      bibleTranslationSlug,
       translationId: firstVerse.translationId,
       start: {
         book: startBook,

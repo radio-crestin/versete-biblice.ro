@@ -44,7 +44,7 @@ export const VerseSchema = z.object({
 });
 
 export const PassageResponseSchema = SuccessSchema.extend({
-  translationSlug: z.string().describe('Translation identifier'),
+  bibleTranslationSlug: z.string().describe('Translation identifier'),
   translationId: z.number().describe('Translation ID'),
   start: z.object({
     book: z.string().describe('Start book slug'),
@@ -82,9 +82,9 @@ export const SlugParamSchema = z.object({
 });
 
 export const PassageParamSchema = z.object({
-  translationSlug: z.string().min(1).describe('Translation slug').openapi({
+  bibleTranslationSlug: z.string().min(1).describe('Translation slug').openapi({
     param: {
-      name: 'translationSlug',
+      name: 'bibleTranslationSlug',
       in: 'path',
     },
     example: 'vdcc',
@@ -198,7 +198,7 @@ export const PublishedQuotesResponseSchema = SuccessSchema.extend({
 });
 
 export const GetQuotesQuerySchema = z.object({
-  translationSlug: z.string().min(1).describe('Translation slug to filter quotes by (e.g., "vdcc")').openapi({
+  bibleTranslationSlug: z.string().min(1).describe('Translation slug to filter quotes by (e.g., "vdcc")').openapi({
     example: 'vdcc',
   }),
   startBook: z.string().optional().describe('Filter quotes starting from this book (optional)').openapi({

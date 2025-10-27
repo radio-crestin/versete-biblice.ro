@@ -7,8 +7,12 @@ import {
 } from '@/schemas/index';
 import { upsertQuote, getPublishedQuotes } from '@/services/quotes.service';
 import { parseReference } from '@/utils/reference-parser';
+import { createDynamicGetQuotesQuerySchema } from '@/utils/dynamic-schema';
 
 const app = new OpenAPIHono();
+
+// Create dynamic query schema with translation slugs and book slugs
+const GetQuotesQuerySchema = createDynamicGetQuotesQuerySchema();
 
 // POST /api/v1/bible/quotes - Create a new Bible quote
 const createQuoteRoute = createRoute({
@@ -42,7 +46,10 @@ const createQuoteRoute = createRoute({
 }
 \`\`\`
 
-**Note:** You must provide EITHER reference OR individual fields (startBook, startChapter, startVerse), not both. All fields except the reference/individual fields are optional.`,
+**Note:**
+- Quotes are translation-agnostic and only store the reference information
+- You must provide EITHER reference OR individual fields (startBook, startChapter, startVerse), not both
+- All fields are optional except the reference/individual fields`,
   request: {
     body: {
       content: {
@@ -104,10 +111,9 @@ app.openapi(createQuoteRoute, async (c) => {
     let startVerse: number;
     let endVerse: number | null = null;
 
-    // If reference is provided, parse it
+    // If reference is provided, parse it (using default translation for parsing)
     if (body.reference !== undefined && body.reference !== '') {
-      const translationSlug = body.translationSlug ?? 'vdcc';
-      const parsed = await parseReference(body.reference, translationSlug);
+      const parsed = await parseReference(body.reference, 'vdcc');
 
       if (parsed === null) {
         return c.json({
@@ -204,18 +210,36 @@ const getPublishedQuotesRoute = createRoute({
   operationId: 'getPublishedQuotes',
   tags: ['Bible Quotes'],
   summary: 'Get published quotes',
-  description: `Retrieve all published Bible quotes. Only public information is returned (no IP addresses).
+  description: `Retrieve published Bible quotes with their verses, filtered by translation and optionally by book, chapter, verse range, publication date, and pagination.
 
-**Returns:**
-- Quote ID
-- User name (if provided)
-- Bible reference
-- User language
-- User note
-- Timestamps (created, updated, published)
+**Required Parameters:**
+- bibleTranslationSlug: Translation identifier (e.g., "vdcc") - verses will be returned in this translation
 
-**Example:**
-\`GET /api/v1/bible/quotes\``,
+**Optional Filters:**
+- startBook, endBook: Filter quotes by book range (English slugs like "genesis", "exodus")
+- startChapter, endChapter: Filter quotes by chapter range
+- startVerse, endVerse: Filter quotes by verse range
+- publishedAtGt: Filter quotes published after this date (ISO 8601 format)
+- publishedAtGte: Filter quotes published on or after this date (ISO 8601 format)
+- publishedAtLt: Filter quotes published before this date (ISO 8601 format)
+- publishedAtLte: Filter quotes published on or before this date (ISO 8601 format)
+
+**Pagination:**
+- limit: Maximum number of quotes to return (default: 50, max: 500)
+- offset: Number of quotes to skip (default: 0)
+
+**Returns (for each quote):**
+- Quote metadata (ID, user name, reference, language, note, timestamps)
+- Full array of verses with their text (from the specified translation)
+
+**Examples:**
+\`GET /api/v1/bible/quotes?bibleTranslationSlug=vdcc\` - Get first 50 quotes for VDCC translation
+\`GET /api/v1/bible/quotes?bibleTranslationSlug=vdcc&limit=100&offset=50\` - Get quotes 51-150
+\`GET /api/v1/bible/quotes?bibleTranslationSlug=vdcc&startBook=genesis&endBook=exodus\` - Filter by book range
+\`GET /api/v1/bible/quotes?bibleTranslationSlug=vdcc&publishedAtGte=2025-01-01T00:00:00Z\` - Quotes published in 2025+`,
+  request: {
+    query: GetQuotesQuerySchema,
+  },
   responses: {
     200: {
       content: {
@@ -228,9 +252,25 @@ const getPublishedQuotesRoute = createRoute({
               {
                 id: 1,
                 userName: 'John Doe',
-                reference: 'Genesis 1:1-5',
+                reference: 'Genesis 1:1-2',
                 userLanguage: 'en',
                 userNote: 'In the beginning...',
+                verses: [
+                  {
+                    bookSlug: 'genesis',
+                    bookName: 'Geneza',
+                    chapter: 1,
+                    verse: 1,
+                    text: 'La început Dumnezeu a făcut cerurile şi pământul.',
+                  },
+                  {
+                    bookSlug: 'genesis',
+                    bookName: 'Geneza',
+                    chapter: 1,
+                    verse: 2,
+                    text: 'Pământul era pustiu şi gol...',
+                  },
+                ],
                 createdAt: '2025-10-27 12:00:00',
                 updatedAt: '2025-10-27 12:00:00',
                 publishedAt: '2025-10-27 12:00:00',
@@ -241,6 +281,15 @@ const getPublishedQuotesRoute = createRoute({
                 reference: 'John 3:16',
                 userLanguage: 'en',
                 userNote: 'For God so loved the world...',
+                verses: [
+                  {
+                    bookSlug: 'john',
+                    bookName: 'Ioan',
+                    chapter: 3,
+                    verse: 16,
+                    text: 'Fiindcă atât de mult a iubit Dumnezeu lumea...',
+                  },
+                ],
                 createdAt: '2025-10-27 11:30:00',
                 updatedAt: '2025-10-27 11:30:00',
                 publishedAt: '2025-10-27 11:30:00',
@@ -250,6 +299,14 @@ const getPublishedQuotesRoute = createRoute({
         },
       },
       description: 'Published quotes retrieved successfully',
+    },
+    400: {
+      content: {
+        'application/json': {
+          schema: ErrorSchema,
+        },
+      },
+      description: 'Invalid query parameters',
     },
     500: {
       content: {
@@ -264,7 +321,22 @@ const getPublishedQuotesRoute = createRoute({
 
 app.openapi(getPublishedQuotesRoute, async (c) => {
   try {
-    const results = await getPublishedQuotes();
+    const query = c.req.valid('query');
+
+    const results = await getPublishedQuotes(query.bibleTranslationSlug, {
+      startBook: query.startBook,
+      endBook: query.endBook,
+      startChapter: query.startChapter,
+      endChapter: query.endChapter,
+      startVerse: query.startVerse,
+      endVerse: query.endVerse,
+      limit: query.limit,
+      offset: query.offset,
+      publishedAtGt: query.publishedAtGt,
+      publishedAtGte: query.publishedAtGte,
+      publishedAtLt: query.publishedAtLt,
+      publishedAtLte: query.publishedAtLte,
+    });
 
     return c.json({
       success: true,

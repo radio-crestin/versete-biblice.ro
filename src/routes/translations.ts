@@ -20,9 +20,9 @@ const getAllTranslationsRoute = createRoute({
   description: `Retrieve a list of all available Bible translations. Optionally filter by language code.
 
 **Examples:**
-- Get translations: \`/api/v1/bible/translations\`
-- Get Romanian translations: \`/api/v1/bible/translations?language=ron\`
-- Get English translations: \`/api/v1/bible/translations?language=eng\``,
+- Get All Bible translations: \`/api/v1/bible/translations\`
+- Get Romanian translations: \`/api/v1/bible/translations?language=ro\`
+- Get English translations: \`/api/v1/bible/translations?language=en\``,
   request: {
     query: createDynamicTranslationsQuerySchema(),
   },

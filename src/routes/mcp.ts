@@ -18,10 +18,10 @@ function getAllTranslations(): { slug: string; language: string; name: string }[
 /**
  * Get a Bible passage using a natural reference string
  */
-async function getBiblePassage(translationSlug: string, reference: string): Promise<{
+async function getBiblePassage(bibleTranslationSlug: string, reference: string): Promise<{
   success: boolean;
   error?: string;
-  translationSlug?: string;
+  bibleTranslationSlug?: string;
   translationId?: number;
   start?: { book: string; chapter: number; verse: number };
   end?: { book: string; chapter: number; verse: number };
@@ -30,7 +30,7 @@ async function getBiblePassage(translationSlug: string, reference: string): Prom
 }> {
   try {
     // Parse the reference string
-    const parsed = await parseReference(reference, translationSlug);
+    const parsed = await parseReference(reference, bibleTranslationSlug);
 
     if (parsed === null) {
       return {
@@ -64,7 +64,7 @@ async function getBiblePassage(translationSlug: string, reference: string): Prom
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             eq(verses.chapter, chapter),
             eq(verses.verse, verse)
@@ -78,7 +78,7 @@ async function getBiblePassage(translationSlug: string, reference: string): Prom
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             eq(verses.chapter, chapter),
             gte(verses.verse, verse),
@@ -93,7 +93,7 @@ async function getBiblePassage(translationSlug: string, reference: string): Prom
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             createBookFilter(startBook),
             or(
               // Start chapter: from start verse onwards
@@ -117,7 +117,7 @@ async function getBiblePassage(translationSlug: string, reference: string): Prom
         .from(verses)
         .where(
           and(
-            eq(verses.translationSlug, translationSlug),
+            eq(verses.bibleTranslationSlug, bibleTranslationSlug),
             or(
               // Start book: from start chapter/verse onwards
               and(
@@ -154,7 +154,7 @@ async function getBiblePassage(translationSlug: string, reference: string): Prom
 
     return {
       success: true,
-      translationSlug,
+      bibleTranslationSlug,
       translationId: firstVerse.translationId,
       start: {
         book: startBook,
@@ -241,13 +241,13 @@ Reference format examples:
 Books can be specified using English names (genesis, matthew, 1-samuel, song-of-solomon).
 Results are limited to 500 verses maximum.`,
         inputSchema: {
-          translationSlug: z.string().describe('Translation slug - call get_bible_translations first to get available options'),
+          bibleTranslationSlug: z.string().describe('Translation slug - call get_bible_translations first to get available options'),
           reference: z.string().describe('Bible reference string (e.g., "genesis 1:1", "john 3:16", "psalm 23")'),
         }
     },
-  async ({ translationSlug, reference }): Promise<CallToolResult> => {
-    console.log('get_bible_passage called with args:', translationSlug, reference);
-    const result = await getBiblePassage(translationSlug, reference);
+  async ({ bibleTranslationSlug, reference }): Promise<CallToolResult> => {
+    console.log('get_bible_passage called with args:', bibleTranslationSlug, reference);
+    const result = await getBiblePassage(bibleTranslationSlug, reference);
     return {
       content: [
         {

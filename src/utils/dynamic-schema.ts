@@ -43,9 +43,9 @@ export function createDynamicPassageParamSchema() {
   const translationSlugs = getTranslationSlugs();
 
   return z.object({
-    translationSlug: z.enum(translationSlugs as [string, ...string[]]).describe('Translation slug').openapi({
+    bibleTranslationSlug: z.enum(translationSlugs as [string, ...string[]]).describe('Translation slug').openapi({
       param: {
-        name: 'translationSlug',
+        name: 'bibleTranslationSlug',
         in: 'path',
       },
       example: translationSlugs[0] ?? 'vdcc',
@@ -90,6 +90,56 @@ export function createDynamicTranslationsQuerySchema() {
   return z.object({
     language: z.enum(languages as [string, ...string[]]).optional().describe('Filter by language code').openapi({
       example: languages[0] ?? 'ron',
+    }),
+  });
+}
+
+/**
+ * Create dynamic GetQuotesQuerySchema with actual translation slugs and filters
+ */
+export function createDynamicGetQuotesQuerySchema() {
+  const translationSlugs = getTranslationSlugs();
+  const bookSlugs = getBookSlugs();
+
+  return z.object({
+    bibleTranslationSlug: z.enum(translationSlugs as [string, ...string[]]).describe('Translation slug to retrieve verses in (e.g., "vdcc")').openapi({
+      example: translationSlugs[0] ?? 'vdcc',
+    }),
+    startBook: z.enum(bookSlugs as [string, ...string[]]).optional().describe('Filter quotes starting from this book (optional)').openapi({
+      example: 'genesis',
+    }),
+    endBook: z.enum(bookSlugs as [string, ...string[]]).optional().describe('Filter quotes ending at this book (optional)').openapi({
+      example: 'exodus',
+    }),
+    startChapter: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes starting from this chapter (optional)').openapi({
+      example: '1',
+    }),
+    endChapter: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes ending at this chapter (optional)').openapi({
+      example: '5',
+    }),
+    startVerse: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes starting from this verse (optional)').openapi({
+      example: '1',
+    }),
+    endVerse: z.string().regex(/^\d+$/).transform(Number).optional().describe('Filter quotes ending at this verse (optional)').openapi({
+      example: '10',
+    }),
+    limit: z.string().regex(/^\d+$/).default('50').transform(Number).describe('Maximum number of quotes to return (default: 50, max: 500)').openapi({
+      example: '50',
+    }),
+    offset: z.string().regex(/^\d+$/).default('0').transform(Number).describe('Number of quotes to skip for pagination (default: 0)').openapi({
+      example: '0',
+    }),
+    publishedAtGt: z.string().datetime().optional().describe('Filter quotes published after this date (ISO 8601 format)').openapi({
+      example: '2025-01-01T00:00:00Z',
+    }),
+    publishedAtGte: z.string().datetime().optional().describe('Filter quotes published on or after this date (ISO 8601 format)').openapi({
+      example: '2025-01-01T00:00:00Z',
+    }),
+    publishedAtLt: z.string().datetime().optional().describe('Filter quotes published before this date (ISO 8601 format)').openapi({
+      example: '2025-12-31T23:59:59Z',
+    }),
+    publishedAtLte: z.string().datetime().optional().describe('Filter quotes published on or before this date (ISO 8601 format)').openapi({
+      example: '2025-12-31T23:59:59Z',
     }),
   });
 }

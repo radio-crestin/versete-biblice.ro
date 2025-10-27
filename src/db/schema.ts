@@ -41,7 +41,7 @@ export const verses = sqliteTable('verses', {
 
   // Denormalized translation info for single-query lookups
   translationId: integer('translation_id').notNull().references(() => translations.id, { onDelete: 'cascade' }),
-  translationSlug: text('translation_slug', { length: 50 }).notNull(), // e.g., 'vdcc', 'kjv'
+  bibleTranslationSlug: text('bible_translation_slug', { length: 50 }).notNull(), // e.g., 'vdcc', 'kjv'
 
   // Denormalized book info for single-query lookups
   bookSlug: text('book_slug', { length: 50 }).notNull(), // English book slug (e.g., 'genesis', 'matthew', '1-samuel')
@@ -60,7 +60,7 @@ export const verses = sqliteTable('verses', {
 }, (table) => [
   // Unique constraint: one verse per translation/book/chapter/verse combination
   uniqueIndex('unique_verse').on(
-    table.translationSlug,
+    table.bibleTranslationSlug,
     table.bookSlug,
     table.chapter,
     table.verse
@@ -68,23 +68,23 @@ export const verses = sqliteTable('verses', {
   // Optimized composite indexes for common query patterns
   // Primary lookup pattern: translation + book + chapter + verse
   index('lookup_idx').on(
-    table.translationSlug,
+    table.bibleTranslationSlug,
     table.bookSlug,
     table.chapter,
     table.verse
   ),
   // Translation + book queries (e.g., get all verses in a book)
-  index('translation_book_idx').on(table.translationSlug, table.bookSlug),
+  index('translation_book_idx').on(table.bibleTranslationSlug, table.bookSlug),
   // Translation + book + chapter queries (e.g., get all verses in a chapter)
   index('translation_book_chapter_idx').on(
-    table.translationSlug,
+    table.bibleTranslationSlug,
     table.bookSlug,
     table.chapter
   ),
   // Translation + bookName for searching by localized book name
-  index('translation_book_name_idx').on(table.translationSlug, table.bookName),
+  index('translation_book_name_idx').on(table.bibleTranslationSlug, table.bookName),
   // Individual indexes for filtering
-  index('translation_slug_idx').on(table.translationSlug),
+  index('bible_translation_slug_idx').on(table.bibleTranslationSlug),
   index('book_slug_idx').on(table.bookSlug),
   index('book_name_idx').on(table.bookName),
 ]);

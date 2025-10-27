@@ -67,7 +67,7 @@ async function generateVdccBooks() {
         verse: verses.verse,
       })
       .from(verses)
-      .where(eq(verses.translationSlug, 'vdcc'))
+      .where(eq(verses.bibleTranslationSlug, 'vdcc'))
       .orderBy(verses.bookSlug, verses.chapter, verses.verse);
 
     console.log(`✅ Found ${vdccVerses.length} verses from VDCC`);

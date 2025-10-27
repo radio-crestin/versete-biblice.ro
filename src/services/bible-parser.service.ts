@@ -16,7 +16,7 @@ import { getTranslationSlug, getBookSlug } from '../utils/slugify.js';
 export interface UploadResult {
   success: boolean;
   translationId?: number;
-  translationSlug?: string;
+  bibleTranslationSlug?: string;
   stats?: {
     booksProcessed: number;
     chaptersProcessed: number;
@@ -85,12 +85,12 @@ async function upsertTranslation(
  * Delete all verses for a specific translation
  * Used to clean up before re-importing
  */
-async function deleteTranslationVerses(translationSlug: string): Promise<void> {
-  logger.debug(`Deleting existing verses for translation: ${translationSlug}`);
+async function deleteTranslationVerses(bibleTranslationSlug: string): Promise<void> {
+  logger.debug(`Deleting existing verses for translation: ${bibleTranslationSlug}`);
 
-  await db.delete(verses).where(eq(verses.translationSlug, translationSlug));
+  await db.delete(verses).where(eq(verses.bibleTranslationSlug, bibleTranslationSlug));
 
-  logger.info(`Deleted all verses for translation: ${translationSlug}`);
+  logger.info(`Deleted all verses for translation: ${bibleTranslationSlug}`);
 }
 
 /**
@@ -115,7 +115,7 @@ async function bulkUpsertVerses(versesToUpsert: NewVerse[]): Promise<number> {
       .insert(verses)
       .values(batch)
       .onConflictDoUpdate({
-        target: [verses.translationSlug, verses.bookSlug, verses.chapter, verses.verse],
+        target: [verses.bibleTranslationSlug, verses.bookSlug, verses.chapter, verses.verse],
         set: {
           text: verses.text,
           bookName: verses.bookName,
@@ -199,7 +199,7 @@ export async function uploadBibleTranslation(
         for (const [_verseId, verseData] of Object.entries(chapter.verses)) {
           allVerses.push({
             translationId: translation.id,
-            translationSlug: translation.slug,
+            bibleTranslationSlug: translation.slug,
             bookSlug, // English book slug (e.g., 'genesis', 'matthew')
             bookName: book.bookTitle, // Localized book name (e.g., 'Geneza', 'Matei')
             testament,
@@ -238,7 +238,7 @@ export async function uploadBibleTranslation(
     return {
       success: true,
       translationId: translation.id,
-      translationSlug: translation.slug,
+      bibleTranslationSlug: translation.slug,
       stats: {
         booksProcessed: parsedBooks.length,
         chaptersProcessed: totalChapters,

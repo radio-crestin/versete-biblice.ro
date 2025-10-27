@@ -62,7 +62,7 @@ async function main() {
   logger.info('='.repeat(60));
   if (result.success) {
     logger.info('✓ UPLOAD SUCCESSFUL');
-    logger.info(`  Translation Slug: ${result.translationSlug}`);
+    logger.info(`  Translation Slug: ${result.bibleTranslationSlug}`);
     logger.info(`  Translation ID: ${result.translationId}`);
     logger.info(`  Books: ${result.stats?.booksProcessed}`);
     logger.info(`  Chapters: ${result.stats?.chaptersProcessed}`);
