@@ -7,17 +7,17 @@ import { eq, sql } from 'drizzle-orm';
  * @param quote - The quote data to upsert
  * @returns The created/updated quote with its ID
  */
-export async function upsertQuote(quote: NewQuote & { id?: number }) {
+export async function upsertQuote(quote: NewQuote & { id?: number }): Promise<{ id: number }> {
   const now = new Date().toISOString();
 
   // If updating an existing quote and publishing it, set publishedAt
   const quoteData = {
     ...quote,
     updatedAt: now,
-    ...(quote.published && !quote.publishedAt ? { publishedAt: now } : {}),
+    ...(quote.published === true && (quote.publishedAt === null || quote.publishedAt === undefined) ? { publishedAt: now } : {}),
   };
 
-  if (quote.id) {
+  if (quote.id !== undefined) {
     // Update existing quote
     await db
       .update(quotes)
@@ -40,7 +40,7 @@ export async function upsertQuote(quote: NewQuote & { id?: number }) {
  * Deletes a quote by ID
  * @param id - The quote ID to delete
  */
-export async function deleteQuote(id: number) {
+export async function deleteQuote(id: number): Promise<void> {
   await db.delete(quotes).where(eq(quotes.id, id));
 }
 
@@ -48,7 +48,16 @@ export async function deleteQuote(id: number) {
  * Fetches all published quotes with only public information
  * @returns Array of published quotes with public fields only
  */
-export async function getPublishedQuotes() {
+export async function getPublishedQuotes(): Promise<Array<{
+  id: number;
+  userName: string | null;
+  reference: string;
+  userLanguage: string;
+  userNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+}>> {
   return await db
     .select({
       id: quotes.id,

@@ -111,7 +111,7 @@ export const quotes = sqliteTable('quotes', {
 
   // User content
   userLanguage: text('user_language', { length: 10 }).notNull(), // ISO language code
-  userNote: text('user_note').notNull(), // User's note about this quote
+  userNote: text('user_note'), // Optional user note about this quote
 
   // Publication status
   published: integer('published', { mode: 'boolean' }).notNull().default(false),

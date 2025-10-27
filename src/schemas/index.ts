@@ -116,16 +116,63 @@ export const PassageQuerySchema = z.object({
 // Quote schemas
 export const CreateQuoteSchema = z.object({
   userName: z.string().optional().describe('Optional display name for the user'),
-  reference: z.string().min(1).describe('Full Bible reference string (e.g., "Genesis 1:1-5")'),
-  startBook: z.string().min(1).describe('Starting book slug'),
+  reference: z.string().min(1).optional().describe('Full Bible reference string (e.g., "Genesis 1:1-5"). Either this OR the individual fields (startBook, startChapter, startVerse) must be provided, but not both.'),
+  translationSlug: z.string().optional().describe('Translation slug for parsing reference (e.g., "vdcc"). Defaults to "vdcc" if not provided. Only used when reference is provided.'),
+  startBook: z.string().min(1).optional().describe('Starting book slug. Required if reference is not provided.'),
   endBook: z.string().optional().describe('Ending book slug (optional if same as startBook)'),
-  startChapter: z.number().int().positive().describe('Starting chapter number'),
+  startChapter: z.number().int().positive().optional().describe('Starting chapter number. Required if reference is not provided.'),
   endChapter: z.number().int().positive().optional().describe('Ending chapter number (optional if same as startChapter)'),
-  startVerse: z.number().int().positive().describe('Starting verse number'),
+  startVerse: z.number().int().positive().optional().describe('Starting verse number. Required if reference is not provided.'),
   endVerse: z.number().int().positive().optional().describe('Ending verse number (optional if single verse)'),
-  userLanguage: z.string().min(2).max(10).describe('ISO language code (e.g., "ro", "en")'),
-  userNote: z.string().min(1).describe('User\'s note or comment about this quote'),
-  published: z.boolean().default(false).describe('Whether the quote is publicly visible'),
+  userLanguage: z.string().min(2).max(10).optional().describe('Optional ISO language code (e.g., "ro", "en"). Defaults to "en" if not provided.'),
+  userNote: z.string().min(1).optional().describe('Optional user note or comment about this quote'),
+}).superRefine((data, ctx) => {
+  // Check if both reference and individual fields are provided
+  const hasReference = data.reference !== undefined && data.reference !== '';
+  const hasIndividualFields = data.startBook !== undefined || data.startChapter !== undefined || data.startVerse !== undefined;
+
+  if (hasReference && hasIndividualFields) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Cannot provide both reference and individual fields (startBook, startChapter, startVerse). Use one or the other.',
+      path: ['reference'],
+    });
+    return;
+  }
+
+  if (!hasReference && !hasIndividualFields) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Must provide either reference or individual fields (startBook, startChapter, startVerse).',
+      path: ['reference'],
+    });
+    return;
+  }
+
+  // If individual fields are provided, validate that required fields are present
+  if (!hasReference) {
+    if (data.startBook === undefined || data.startBook === '') {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'startBook is required when reference is not provided',
+        path: ['startBook'],
+      });
+    }
+    if (data.startChapter === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'startChapter is required when reference is not provided',
+        path: ['startChapter'],
+      });
+    }
+    if (data.startVerse === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'startVerse is required when reference is not provided',
+        path: ['startVerse'],
+      });
+    }
+  }
 });
 
 export const QuoteSchema = z.object({
@@ -133,7 +180,7 @@ export const QuoteSchema = z.object({
   userName: z.string().nullable().describe('User display name'),
   reference: z.string().describe('Full Bible reference string'),
   userLanguage: z.string().describe('ISO language code'),
-  userNote: z.string().describe('User\'s note about this quote'),
+  userNote: z.string().nullable().describe('Optional user note about this quote'),
   createdAt: z.string().describe('Creation timestamp'),
   updatedAt: z.string().describe('Last update timestamp'),
   publishedAt: z.string().nullable().describe('Publication timestamp'),
