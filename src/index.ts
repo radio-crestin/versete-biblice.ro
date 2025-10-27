@@ -8,7 +8,7 @@ import {prettyJSON} from 'hono/pretty-json';
 import {translationsRoute} from './routes/translations.js';
 import {passagesRoute} from './routes/passages.js';
 import {referenceRoute} from './routes/reference.js';
-import {mcpRoute} from './routes/mcp.js';
+import mcpRoute from './routes/mcp.js';
 
 const app = new OpenAPIHono();
 
@@ -52,9 +52,11 @@ To setup the MCP in your editor, use one of the below commands:
    <p><code class="hljs language-bash code-block-copy">claude mcp add --transport http --scope user versete-biblice ${baseUrl}/api/v1/mcp
 </code></p>
 </details>
-      
-
-
+<details>
+   <summary>VS Code</summary>
+   <p><code class="hljs language-bash code-block-copy">code --add-mcp "{\\"name\\":\\"versete-biblice\\",\\"type\\":\\"http\\",\\"url\\":\\"${baseUrl}/api/v1/mcp\\"}" 
+</code></p>
+</details>   
 
 
 # llms.txt
@@ -88,7 +90,6 @@ app.get(
     '/api/docs/*',
     Scalar((c) => {
         const url = new URL(c.req.url);
-        const baseUrl = url.origin;
         const isLocalDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
 
         return {
