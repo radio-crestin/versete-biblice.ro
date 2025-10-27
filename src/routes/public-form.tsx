@@ -239,7 +239,7 @@ app.get('/', (c) => {
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex justify-end gap-3">
+                <div class="flex justify-between gap-3">
                   <button
                     type="button"
                     id="back-step-2"
