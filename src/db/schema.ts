@@ -18,6 +18,7 @@ export const translations = sqliteTable('translations', {
   totalBooks: integer('total_books').notNull().default(0),
   totalChapters: integer('total_chapters').notNull().default(0),
   totalVerses: integer('total_verses').notNull().default(0),
+  copyrightNotice: text('copyright_notice'), // Copyright information for the translation
 
   // Timestamps
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),

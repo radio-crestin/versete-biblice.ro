@@ -45,6 +45,7 @@ const getAllTranslationsRoute = createRoute({
                 totalBooks: 66,
                 totalChapters: 1189,
                 totalVerses: 31102,
+                copyrightNotice: null,
                 createdAt: '2025-10-27 10:42:44',
                 updatedAt: '2025-10-27T10:42:55.720Z',
               },

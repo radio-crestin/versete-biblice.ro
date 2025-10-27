@@ -203,7 +203,7 @@ mcpServer.registerTool(
 
 Returns information about each translation including:
 - slug: The translation identifier to use in get_bible_passage
-- language: ISO 639-3 set 1language code (e.g., "ro" for Romanian, "en" for English)
+- language: ISO 639-3 set 1 language code (e.g., "ro" for Romanian, "en" for English)
 - name: Full name of the translation
 
 IMPORTANT: Call this tool first to get the available translation slugs before calling get_bible_passage.`,
@@ -245,10 +245,10 @@ Reference format examples:
 
 Books can be specified using English names (genesis, matthew, 1-samuel, song-of-solomon).
 Results are limited to 500 verses maximum.`,
-    inputSchema: {
+    inputSchema: z.object({
       translationSlug: z.string().describe('Translation slug - call get_bible_translations first to get available options'),
       reference: z.string().describe('Bible reference string (e.g., "genesis 1:1", "john 3:16", "psalm 23")'),
-    },
+    }),
   },
   async (args: { translationSlug?: string; reference?: string }) => {
     const { translationSlug, reference } = args;

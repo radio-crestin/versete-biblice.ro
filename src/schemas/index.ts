@@ -20,6 +20,7 @@ export const TranslationSchema = z.object({
   totalBooks: z.number().describe('Total number of books'),
   totalChapters: z.number().describe('Total number of chapters'),
   totalVerses: z.number().describe('Total number of verses'),
+  copyrightNotice: z.string().nullable().describe('Copyright information for the translation'),
   createdAt: z.string().describe('Creation timestamp'),
   updatedAt: z.string().describe('Last update timestamp'),
 });
