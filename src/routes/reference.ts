@@ -137,12 +137,10 @@ app.openapi(getReferenceRoute, async (c) => {
     const finalEndChapter = endChapter || chapter;
     const finalEndVerse = endVerse || verse;
 
-    // Helper function to create book filter that supports both slug and bookName
+    // Helper function to create book filter
+    // The bookValue here is already a resolved book slug from parseReference
     const createBookFilter = (bookValue: string) => {
-      return or(
-        eq(verses.bookSlug, bookValue),
-        sql`LOWER(${verses.bookName}) = ${bookValue.toLowerCase()}`
-      );
+      return eq(verses.bookSlug, bookValue);
     };
 
     // Build the query based on the range (same logic as passage endpoint)

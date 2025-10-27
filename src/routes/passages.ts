@@ -112,12 +112,10 @@ app.openapi(getPassageRoute, async (c) => {
   const finalEndVerse = endVerse || verse;
 
   try {
-    // Helper function to create book filter that supports both slug and bookName
+    // Helper function to create book filter
+    // The bookValue here is already a resolved book slug from the caller
     const createBookFilter = (bookValue: string) => {
-      return or(
-        eq(verses.bookSlug, bookValue),
-        sql`LOWER(${verses.bookName}) = ${bookValue.toLowerCase()}`
-      );
+      return eq(verses.bookSlug, bookValue);
     };
 
     // Build the query based on the range

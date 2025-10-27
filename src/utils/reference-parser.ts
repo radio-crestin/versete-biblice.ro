@@ -12,6 +12,31 @@ export interface ParsedReference {
 }
 
 /**
+ * Normalize a string for comparison by removing diacritics and converting to lowercase
+ * - Removes diacritics (e.g., "Împăraţi" -> "imparati")
+ * - Converts to lowercase
+ * - Normalizes spaces and non-alphanumeric characters
+ * - Trims whitespace
+ */
+export function normalizeForComparison(text: string): string {
+  return text
+    .normalize('NFD') // Decompose characters with diacritics
+    .replace(/[\u0300-\u036f]/g, '') // Remove combining diacritical marks
+    .toLowerCase()
+    .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
+    .trim();
+}
+
+/**
+ * Normalize a string for partial matching by removing all non-alphanumeric characters
+ * Used for flexible book name matching (e.g., "1 Imp" matches "1 Împăraţi")
+ */
+export function normalizeForPartialMatch(text: string): string {
+  return normalizeForComparison(text)
+    .replace(/[^a-z0-9]/g, ''); // Remove all non-alphanumeric characters
+}
+
+/**
  * Clean and normalize a reference string
  * - Trim whitespace
  * - Normalize separators
@@ -30,42 +55,67 @@ function cleanReference(reference: string): string {
 /**
  * Get book slug from reference string
  * Tries to match English book slugs first, then falls back to database lookup
+ * Supports partial matching (e.g., "1 imp" matches "1 Împăraţi")
  */
 async function parseBookFromReference(
   bookPart: string,
   translationSlug: string
 ): Promise<string | null> {
-  const normalizedBookPart = bookPart.toLowerCase().trim();
+  const normalizedBookPart = normalizeForComparison(bookPart);
+  const normalizedForPartial = normalizeForPartialMatch(bookPart);
 
   // First, try to match against English book slugs
   const bookSlugs = getBookSlugs();
 
-  // Try exact match
+  // Try exact match on English slugs
   if (bookSlugs.includes(normalizedBookPart)) {
     return normalizedBookPart;
   }
 
-  // Try partial match (for cases where user might type "1 sam" for "1-samuel")
-  const partialMatch = bookSlugs.find(slug =>
-    slug.startsWith(normalizedBookPart) ||
-    normalizedBookPart.startsWith(slug.split('-')[0])
-  );
+  // Try partial match on English slugs (e.g., "1 sam" -> "1-samuel")
+  const englishPartialMatches = bookSlugs.filter(slug => {
+    const normalizedSlug = normalizeForPartialMatch(slug);
+    return normalizedSlug.startsWith(normalizedForPartial);
+  });
 
-  if (partialMatch) {
-    return partialMatch;
+  // If exactly one partial match, use it
+  if (englishPartialMatches.length === 1) {
+    return englishPartialMatches[0];
   }
 
   // Fallback: query database for localized book names
   const result = await db
-    .select({ bookSlug: verses.bookSlug })
+    .select({ bookSlug: verses.bookSlug, bookName: verses.bookName })
     .from(verses)
-    .where(
-      sql`LOWER(${verses.bookName}) = ${normalizedBookPart} AND ${verses.translationSlug} = ${translationSlug}`
-    )
-    .limit(1);
+    .where(sql`${verses.translationSlug} = ${translationSlug}`)
+    .groupBy(verses.bookSlug, verses.bookName);
 
-  if (result.length > 0) {
-    return result[0].bookSlug;
+  // Try exact match on normalized localized book names
+  const exactMatch = result.find(row =>
+    normalizeForComparison(row.bookName) === normalizedBookPart
+  );
+
+  if (exactMatch) {
+    return exactMatch.bookSlug;
+  }
+
+  // Try partial match on normalized localized book names
+  const localizedPartialMatches = result.filter(row => {
+    const normalizedName = normalizeForPartialMatch(row.bookName);
+    return normalizedName.startsWith(normalizedForPartial);
+  });
+
+  // If exactly one partial match, use it
+  if (localizedPartialMatches.length === 1) {
+    return localizedPartialMatches[0].bookSlug;
+  }
+
+  // If multiple partial matches, return the shortest one (most specific)
+  if (localizedPartialMatches.length > 1) {
+    const sorted = localizedPartialMatches.sort((a, b) =>
+      a.bookName.length - b.bookName.length
+    );
+    return sorted[0].bookSlug;
   }
 
   return null;
