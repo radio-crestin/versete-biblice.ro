@@ -203,7 +203,7 @@ mcpServer.registerTool(
 
 Returns information about each translation including:
 - slug: The translation identifier to use in get_bible_passage
-- language: ISO 639-3 language code (e.g., "ron" for Romanian, "eng" for English)
+- language: ISO 639-3 set 1language code (e.g., "ro" for Romanian, "en" for English)
 - name: Full name of the translation
 
 IMPORTANT: Call this tool first to get the available translation slugs before calling get_bible_passage.`,
