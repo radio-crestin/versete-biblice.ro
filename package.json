@@ -1,0 +1,45 @@
+{
+  "name": "versete-biblice",
+  "version": "1.0.0",
+  "description": "Bible data parser and API",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch -r dotenv/config src/index.ts",
+    "dev:wrangler": "wrangler dev",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:migrate": "tsx -r dotenv/config src/scripts/migrate.ts",
+    "upload:translation": "tsx -r dotenv/config src/scripts/upload-translation.ts bibles/raw/ron-rccv.usfx.xml vdcc",
+    "deploy": "wrangler deploy --minify",
+    "push:env": "tsx -r dotenv/config src/scripts/push-env.ts production"
+  },
+  "keywords": [
+    "bible",
+    "parser",
+    "mcp"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@hono/mcp": "^0.1.4",
+    "@hono/node-server": "^1.19.5",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.1.4",
+    "@libsql/client": "^0.15.15",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@scalar/hono-api-reference": "^0.9.22",
+    "@scalar/openapi-to-markdown": "^0.2.45",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.7",
+    "hono": "^4.10.3",
+    "xml2js": "^0.6.2",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.5",
+    "tsx": "^4.20.6",
+    "wrangler": "^4.4.0"
+  }
+}
