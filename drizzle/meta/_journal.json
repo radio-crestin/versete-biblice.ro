@@ -57,6 +57,13 @@
       "when": 1761598575019,
       "tag": "0007_greedy_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1761600989262,
+      "tag": "0008_safe_living_mummy",
+      "breakpoints": true
     }
   ]
 }
