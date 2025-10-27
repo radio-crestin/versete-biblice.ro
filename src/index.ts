@@ -48,6 +48,10 @@ app.doc('/api/doc', (c) => {
 To setup the MCP in your editor, use one of the below commands:
 
 <details>
+   <summary>MCP Inspector</summary>
+   <p>Click <a href="https://mcp.ziziyi.com/inspector?serverUrl=${encodeURIComponent(`${baseUrl}/api/v1/mcp`)}&transport=streamable-http" target="_blank">here</a> to open MCP Inspector. </p>
+</details>
+<details>
    <summary>Claude Code</summary>
    <p><code class="hljs language-bash code-block-copy">claude mcp add --transport http --scope user versete-biblice ${baseUrl}/api/v1/mcp
 </code></p>
