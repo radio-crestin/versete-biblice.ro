@@ -20,13 +20,15 @@ app.use('*', cors());
 app.use('*', prettyJSON());
 
 // Homepage - check for publica subdomain or serve API docs
-app.get('/', (c) => {
+app.get('/', async (c) => {
     const url = new URL(c.req.url);
     const hostname = url.hostname;
 
     // Check if accessed via publica subdomain
     if (hostname.startsWith('publica.')) {
-        return c.redirect('/publica');
+        // Serve /publica content directly without redirect
+        const publicaUrl = new URL('/publica', url.origin);
+        return app.fetch(new Request(publicaUrl.toString(), c.req.raw));
     }
 
     return c.redirect('/api/docs');
