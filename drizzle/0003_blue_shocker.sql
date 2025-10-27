@@ -1,20 +1,20 @@
-DROP INDEX "published_idx";--> statement-breakpoint
-DROP INDEX "client_ip_idx";--> statement-breakpoint
-DROP INDEX "user_language_idx";--> statement-breakpoint
-DROP INDEX "published_date_idx";--> statement-breakpoint
-DROP INDEX "translations_slug_unique";--> statement-breakpoint
-DROP INDEX "unique_translation";--> statement-breakpoint
-DROP INDEX "slug_idx";--> statement-breakpoint
-DROP INDEX "language_idx";--> statement-breakpoint
-DROP INDEX "abbreviation_idx";--> statement-breakpoint
-DROP INDEX "unique_verse";--> statement-breakpoint
-DROP INDEX "lookup_idx";--> statement-breakpoint
-DROP INDEX "translation_book_idx";--> statement-breakpoint
-DROP INDEX "translation_book_chapter_idx";--> statement-breakpoint
-DROP INDEX "translation_book_name_idx";--> statement-breakpoint
-DROP INDEX "translation_slug_idx";--> statement-breakpoint
-DROP INDEX "book_slug_idx";--> statement-breakpoint
-DROP INDEX "book_name_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "published_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "client_ip_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "user_language_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "published_date_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "translations_slug_unique";--> statement-breakpoint
+DROP INDEX IF EXISTS "unique_translation";--> statement-breakpoint
+DROP INDEX IF EXISTS "slug_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "language_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "abbreviation_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "unique_verse";--> statement-breakpoint
+DROP INDEX IF EXISTS "lookup_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "translation_book_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "translation_book_chapter_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "translation_book_name_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "translation_slug_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "book_slug_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "book_name_idx";--> statement-breakpoint
 ALTER TABLE `quotes` ALTER COLUMN "user_note" TO "user_note" text;--> statement-breakpoint
 CREATE INDEX `published_idx` ON `quotes` (`published`,`published_at`);--> statement-breakpoint
 CREATE INDEX `client_ip_idx` ON `quotes` (`client_ip`);--> statement-breakpoint

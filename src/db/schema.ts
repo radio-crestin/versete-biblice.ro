@@ -100,7 +100,7 @@ export const quotes = sqliteTable('quotes', {
   clientIp: text('client_ip').notNull(), // IP address of the user creating the quote
   userName: text('user_name'), // Optional display name
 
-  // Bible reference info
+  // Bible reference info (translation-agnostic)
   reference: text('reference').notNull(), // Full reference string (e.g., "Genesis 1:1-5")
   startBook: text('start_book', { length: 50 }).notNull(), // Starting book slug
   endBook: text('end_book', { length: 50 }), // Ending book slug (null if same as startBook)
@@ -121,14 +121,16 @@ export const quotes = sqliteTable('quotes', {
   updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
   publishedAt: text('published_at'), // Timestamp when quote was published
 }, (table) => [
-  // Index for fetching published quotes efficiently
-  index('published_idx').on(table.published, table.publishedAt),
   // Index for user lookups (e.g., find all quotes by IP)
   index('client_ip_idx').on(table.clientIp),
   // Index for language filtering
   index('user_language_idx').on(table.userLanguage),
   // Composite index for published quotes ordered by publication date
   index('published_date_idx').on(table.published, table.publishedAt),
+  // Optimized indexes for filtering queries
+  index('published_book_idx').on(table.published, table.startBook, table.publishedAt),
+  index('published_book_chapter_idx').on(table.published, table.startBook, table.startChapter, table.publishedAt),
+  index('published_book_chapter_verse_idx').on(table.published, table.startBook, table.startChapter, table.startVerse, table.publishedAt),
 ]);
 
 // Type exports for TypeScript
