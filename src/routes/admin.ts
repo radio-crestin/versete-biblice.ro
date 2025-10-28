@@ -33,7 +33,7 @@ const generateBooksRoute = createRoute({
   method: 'post',
   path: '/generate-books/{slug}',
   operationId: 'generateBooks',
-  tags: ['Internal API'],
+  tags: ['Admin API'],
   summary: 'Generate books data for a translation',
   description: 'Internal endpoint to generate and store books data for a translation. Requires system token authentication.',
   security: [
@@ -140,7 +140,7 @@ const generateAllBooksRoute = createRoute({
   method: 'post',
   path: '/generate-all-books',
   operationId: 'generateAllBooks',
-  tags: ['Internal API'],
+  tags: ['Admin API'],
   summary: 'Generate books data for all translations',
   description: 'Internal endpoint to generate and store books data for all translations. Requires system token authentication.',
   security: [

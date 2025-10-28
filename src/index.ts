@@ -236,6 +236,12 @@ app.get(
             },
             pageTitle: 'Versete Biblice API Documentation',
             proxyUrl: isLocalDev ? 'https://proxy.scalar.com' : undefined,
+            authentication: {
+                preferredSecurityScheme: 'bearerAuth',
+                bearerAuth: {
+                    token: 'your-system-token-here',
+                },
+            },
         };
     })
 );
