@@ -14,7 +14,7 @@ import {dailyVerseRoute} from './routes/daily-verse.js';
 import {dailyVersesRoute} from './routes/daily-verses.js';
 import mcpRoute from './routes/mcp.js';
 import {publicFormRoute} from './routes/public-form.js';
-import {internalRoute} from './routes/internal.js';
+import {adminRoute} from './routes/admin.js';
 import {ensureScheduledVerses} from './services/daily-verses.service.js';
 
 const app = new OpenAPIHono();
@@ -105,8 +105,8 @@ app.route('/api/v1/bible/quotes', quotesRoute);
 app.route('/api/v1/bible/daily-verse', dailyVerseRoute);
 app.route('/api/v1/bible/daily-verses', dailyVersesRoute);
 
-// Internal API Routes
-app.route('/api/v1/internal', internalRoute);
+// Admin API Routes
+app.route('/api/v1/admin', adminRoute);
 
 // MCP Server Route
 app.route('/api/v1', mcpRoute);
@@ -198,8 +198,8 @@ This is an open-source project! If you want to contribute, check out the reposit
                 description: 'Daily Bible verse scheduling and retrieval',
             },
             {
-                name: 'Internal API',
-                description: 'Internal API endpoints for system operations (requires authentication)',
+                name: 'Admin API',
+                description: 'Admin API endpoints for system operations (requires authentication)',
             },
         ],
         components: {

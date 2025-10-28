@@ -225,4 +225,4 @@ app.openapi(generateAllBooksRoute, async (c) => {
   }
 });
 
-export { app as internalRoute };
+export { app as adminRoute };

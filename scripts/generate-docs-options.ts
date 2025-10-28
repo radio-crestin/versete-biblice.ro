@@ -10,9 +10,9 @@ const __dirname = dirname(__filename);
  * Build-time script to fetch all translations from database and save to JSON
  * This runs before deployment to avoid database queries at module initialization
  *
- * Note: Books data generation has been moved to the internal API endpoint:
- * POST /api/v1/internal/generate-books/:slug
- * Use the internal API with system token authentication to generate books data
+ * Note: Books data generation has been moved to the admin API endpoint:
+ * POST /api/v1/admin/generate-books/:slug
+ * Use the admin API with system token authentication to generate books data
  */
 async function generateTranslations() {
   console.log('📖 Fetching translations from database...');
@@ -54,9 +54,9 @@ async function generateTranslations() {
 async function main() {
   try {
     await generateTranslations();
-    console.log('\n💡 To generate books data, use the internal API:');
-    console.log('   POST /api/v1/internal/generate-books/:slug');
-    console.log('   POST /api/v1/internal/generate-all-books');
+    console.log('\n💡 To generate books data, use the admin API:');
+    console.log('   POST /api/v1/admin/generate-books/:slug');
+    console.log('   POST /api/v1/admin/generate-all-books');
     console.log('   (Requires Authorization: Bearer <SYSTEM_TOKEN>)');
     process.exit(0);
   } catch (error) {
