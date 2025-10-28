@@ -8,6 +8,13 @@
       "when": 1761608416835,
       "tag": "0000_bored_maximus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1761643792035,
+      "tag": "0001_stiff_argent",
+      "breakpoints": true
     }
   ]
 }

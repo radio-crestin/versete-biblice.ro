@@ -45,6 +45,19 @@ const getAllTranslationsRoute = createRoute({
                 totalChapters: 1189,
                 totalVerses: 31102,
                 copyrightNotice: null,
+                books: [
+                  {
+                    bookIndex: 1,
+                    slug: 'genesis',
+                    name: 'Geneza',
+                    maxChapter: 50,
+                    versesByChapter: {
+                      1: 31,
+                      2: 25,
+                      3: 24,
+                    },
+                  },
+                ],
                 createdAt: '2025-10-27 10:42:44',
                 updatedAt: '2025-10-27T10:42:55.720Z',
               },
@@ -82,10 +95,16 @@ app.openapi(getAllTranslationsRoute, async (c) => {
         results = await db.select().from(translations);
       }
 
+      // Parse books JSON for each translation
+      const translationsWithBooks = results.map((translation) => ({
+        ...translation,
+        books: (translation.books !== null && translation.books !== '') ? JSON.parse(translation.books as string) : null,
+      }));
+
       return c.json({
         success: true,
-        count: results.length,
-        translations: results,
+        count: translationsWithBooks.length,
+        translations: translationsWithBooks,
       }, 200);
     } catch (error) {
       console.error('Error fetching translations:', error);

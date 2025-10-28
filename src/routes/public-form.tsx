@@ -741,8 +741,7 @@ app.get('/', (c) => {
                   startChapter: chapter,
                   startVerse: startVerse,
                   userLanguage: 'ro',
-                  userNote: userNote,
-                  published: true,
+                  userNote: userNote
                 }),
               });
 

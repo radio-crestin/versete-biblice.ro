@@ -14,7 +14,7 @@
     "generate:docs-options": "dotenv -e .env -- tsx scripts/generate-docs-options.ts",
     "predeploy": "npm run generate:docs-options",
     "deploy:production": "wrangler deploy --minify",
-    "push:env:production": "dotenv -e .env -- tsx src/scripts/push-env.ts production",
+    "push:env:production": "dotenv -e .env.production -- tsx src/scripts/push-env.ts production",
     "lint": "pnpm run type-check || eslint src --max-warnings 0",
     "lint:fix": "eslint src --fix",
     "type-check": "tsc --noEmit",

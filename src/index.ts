@@ -14,6 +14,7 @@ import {dailyVerseRoute} from './routes/daily-verse.js';
 import {dailyVersesRoute} from './routes/daily-verses.js';
 import mcpRoute from './routes/mcp.js';
 import {publicFormRoute} from './routes/public-form.js';
+import {internalRoute} from './routes/internal.js';
 import {ensureScheduledVerses} from './services/daily-verses.service.js';
 
 const app = new OpenAPIHono();
@@ -103,6 +104,9 @@ app.route('/api/v1/bible', referenceRoute);
 app.route('/api/v1/bible/quotes', quotesRoute);
 app.route('/api/v1/bible/daily-verse', dailyVerseRoute);
 app.route('/api/v1/bible/daily-verses', dailyVersesRoute);
+
+// Internal API Routes
+app.route('/api/v1/internal', internalRoute);
 
 // MCP Server Route
 app.route('/api/v1', mcpRoute);

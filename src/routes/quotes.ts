@@ -187,8 +187,6 @@ app.openapi(createQuoteRoute, async (c) => {
       endVerse,
       userLanguage: body.userLanguage ?? 'en',
       userNote: body.userNote ?? null,
-      published: true,
-      publishedAt: new Date().toISOString(),
     });
 
     return c.json({

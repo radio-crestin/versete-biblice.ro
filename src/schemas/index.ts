@@ -10,6 +10,15 @@ export const SuccessSchema = z.object({
   success: z.literal(true),
 });
 
+// Book schemas
+export const BookSchema = z.object({
+  bookIndex: z.number().describe('Book position in Bible (1-based)'),
+  slug: z.string().describe('Book slug (e.g., genesis, matthew)'),
+  name: z.string().describe('Localized book name (e.g., Geneza, Matei)'),
+  maxChapter: z.number().describe('Maximum chapter number in this book'),
+  versesByChapter: z.record(z.string(), z.number()).describe('Map of chapter numbers to max verse count'),
+});
+
 // Translation schemas
 export const TranslationSchema = z.object({
   id: z.number().describe('Unique translation ID'),
@@ -21,6 +30,7 @@ export const TranslationSchema = z.object({
   totalChapters: z.number().describe('Total number of chapters'),
   totalVerses: z.number().describe('Total number of verses'),
   copyrightNotice: z.string().nullable().describe('Copyright information for the translation'),
+  books: z.array(BookSchema).nullable().describe('Array of books with chapter/verse structure'),
   createdAt: z.string().describe('Creation timestamp'),
   updatedAt: z.string().describe('Last update timestamp'),
 });
