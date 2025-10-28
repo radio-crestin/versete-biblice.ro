@@ -16,8 +16,10 @@ import mcpRoute from './routes/mcp.js';
 import {publicFormRoute} from './routes/public-form.js';
 import {adminRoute} from './routes/admin.js';
 import {ensureScheduledVerses} from './services/daily-verses.service.js';
+import {Hono} from "hono";
 
-const app = new OpenAPIHono();
+const app = new Hono();
+const api = new OpenAPIHono();
 
 // Middleware
 app.use('*', logger());
@@ -104,21 +106,21 @@ app.get('/', async (c) => {
 app.route('/publica', publicFormRoute);
 
 // API v1 Routes - Bible
-app.route('/api/v1/bible/translations', translationsRoute);
-app.route('/api/v1/bible', passagesRoute);
-app.route('/api/v1/bible', referenceRoute);
-app.route('/api/v1/bible/quotes', quotesRoute);
-app.route('/api/v1/bible/daily-verse', dailyVerseRoute);
-app.route('/api/v1/bible/daily-verses', dailyVersesRoute);
+api.route('/api/v1/bible/translations', translationsRoute);
+api.route('/api/v1/bible', passagesRoute);
+api.route('/api/v1/bible', referenceRoute);
+api.route('/api/v1/bible/quotes', quotesRoute);
+api.route('/api/v1/bible/daily-verse', dailyVerseRoute);
+api.route('/api/v1/bible/daily-verses', dailyVersesRoute);
 
 // Admin API Routes
-app.route('/api/v1/admin', adminRoute);
+api.route('/api/v1/admin', adminRoute);
 
 // MCP Server Route
-app.route('/api/v1', mcpRoute);
+api.route('/api/v1', mcpRoute);
 
 // OpenAPI Documentation - dynamically set server URL
-app.doc('/api/doc', (c) => {
+api.doc('/api/doc', (c) => {
     // Always extract origin from the actual request URL
     // This ensures the API docs always show the correct URL (dev or prod)
     const url = new URL(c.req.url);
@@ -212,7 +214,7 @@ This is an open-source project! If you want to contribute, check out the reposit
 });
 
 // Scalar API Reference (primary documentation)
-app.get(
+api.get(
     '/api/docs/*',
     Scalar((c) => {
         const url = new URL(c.req.url);
@@ -237,12 +239,12 @@ app.get(
 );
 
 // Swagger UI (alternative documentation)
-app.get('/api/swagger', swaggerUI({url: '/api/doc'}));
+api.get('/api/swagger', swaggerUI({url: '/api/doc'}));
 
 // LLMs.txt - AI-readable API documentation
-app.get('/llms.txt', async (c) => {
+api.get('/llms.txt', async (c) => {
     // Get the OpenAPI document
-    const content = app.getOpenAPI31Document({
+    const content = api.getOpenAPI31Document({
         openapi: '3.1.0',
         info: {
             title: 'Versete Biblice API',
@@ -256,6 +258,8 @@ app.get('/llms.txt', async (c) => {
 
     return c.text(markdown);
 });
+
+app.route("/", api);
 
 // 404 handler
 app.notFound((c) => {
