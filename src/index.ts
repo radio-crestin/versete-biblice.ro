@@ -199,19 +199,9 @@ This is an open-source project! If you want to contribute, check out the reposit
             },
             {
                 name: 'Admin API',
-                description: 'Admin API endpoints for system operations (requires authentication)',
+                description: 'Admin API endpoints for system operations (requires authentication via token query parameter)',
             },
         ],
-        components: {
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'token',
-                    description: 'System token for internal API authentication. Set this to your SYSTEM_TOKEN environment variable value.',
-                },
-            },
-        },
     };
 });
 
@@ -236,12 +226,6 @@ app.get(
             },
             pageTitle: 'Versete Biblice API Documentation',
             proxyUrl: isLocalDev ? 'https://proxy.scalar.com' : undefined,
-            authentication: {
-                preferredSecurityScheme: 'bearerAuth',
-                bearerAuth: {
-                    token: 'your-system-token-here',
-                },
-            },
         };
     })
 );

@@ -9,3 +9,4 @@
 - use typescript with strict mode enabled
 - use tailwindcss for styling
 - use @/ as the base path for imports
+- use bibleTranslationSlug everywhere, not just translation

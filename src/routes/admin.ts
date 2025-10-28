@@ -9,19 +9,16 @@ import type { Context } from 'hono';
 const app = new OpenAPIHono();
 
 /**
- * Validate system token from context
+ * Validate system token from query parameter
  */
-function validateToken(c: Context): { valid: boolean; error?: string } {
+function validateToken(c: Context, providedToken: string | undefined): { valid: boolean; error?: string } {
   const systemToken = c.env?.SYSTEM_TOKEN as string | undefined;
 
   if (systemToken === undefined || systemToken === '') {
     return { valid: false, error: 'System token not configured' };
   }
 
-  const authHeader = c.req.header('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
-
-  if (token === undefined || token === '' || token !== systemToken) {
+  if (providedToken === undefined || providedToken === '' || providedToken !== systemToken) {
     return { valid: false, error: 'Unauthorized' };
   }
 
@@ -35,15 +32,13 @@ const generateBooksRoute = createRoute({
   operationId: 'generateBooks',
   tags: ['Admin API'],
   summary: 'Generate books data for a translation',
-  description: 'Internal endpoint to generate and store books data for a translation. Requires system token authentication.',
-  security: [
-    {
-      bearerAuth: [],
-    },
-  ],
+  description: 'Internal endpoint to generate and store books data for a translation. Requires system token as query parameter.',
   request: {
     params: z.object({
       slug: z.string().min(1).describe('Translation slug'),
+    }),
+    query: z.object({
+      token: z.string().min(1).describe('System authentication token'),
     }),
   },
   responses: {
@@ -64,7 +59,7 @@ const generateBooksRoute = createRoute({
           schema: ErrorSchema,
         },
       },
-      description: 'Unauthorized - Invalid or missing system token',
+      description: 'Unauthorized - Invalid or missing token query parameter',
     },
     404: {
       content: {
@@ -86,15 +81,17 @@ const generateBooksRoute = createRoute({
 });
 
 app.openapi(generateBooksRoute, async (c) => {
+  const validatedParams = c.req.valid('param');
+  const validatedQuery = c.req.valid('query');
+  const slug = validatedParams.slug;
+  const token = validatedQuery.token;
+
   // Validate token
-  const tokenValidation = validateToken(c);
+  const tokenValidation = validateToken(c, token);
   if (!tokenValidation.valid) {
     const statusCode = tokenValidation.error === 'System token not configured' ? 500 : 401;
     return c.json({ success: false, error: tokenValidation.error ?? 'Unauthorized' }, statusCode);
   }
-
-  const validatedParams = c.req.valid('param');
-  const slug = validatedParams.slug;
 
   try {
     // Check if translation exists
@@ -142,12 +139,12 @@ const generateAllBooksRoute = createRoute({
   operationId: 'generateAllBooks',
   tags: ['Admin API'],
   summary: 'Generate books data for all translations',
-  description: 'Internal endpoint to generate and store books data for all translations. Requires system token authentication.',
-  security: [
-    {
-      bearerAuth: [],
-    },
-  ],
+  description: 'Internal endpoint to generate and store books data for all translations. Requires system token as query parameter.',
+  request: {
+    query: z.object({
+      token: z.string().min(1).describe('System authentication token'),
+    }),
+  },
   responses: {
     200: {
       content: {
@@ -166,7 +163,7 @@ const generateAllBooksRoute = createRoute({
           schema: ErrorSchema,
         },
       },
-      description: 'Unauthorized - Invalid or missing system token',
+      description: 'Unauthorized - Invalid or missing token query parameter',
     },
     500: {
       content: {
@@ -180,8 +177,11 @@ const generateAllBooksRoute = createRoute({
 });
 
 app.openapi(generateAllBooksRoute, async (c) => {
+  const validatedQuery = c.req.valid('query');
+  const token = validatedQuery.token;
+
   // Validate token
-  const tokenValidation = validateToken(c);
+  const tokenValidation = validateToken(c, token);
   if (!tokenValidation.valid) {
     const statusCode = tokenValidation.error === 'System token not configured' ? 500 : 401;
     return c.json({ success: false, error: tokenValidation.error ?? 'Unauthorized' }, statusCode);
