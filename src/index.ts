@@ -29,6 +29,7 @@ app.get('/api/v1/bible/translations', cache({
     cacheName: 'bible-translations',
     cacheControl: 'public, s-maxage=3600, max-age=0, must-revalidate', // 1 hour
     keyGenerator: (c) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
         return `${c.req.url}:${cacheVersion}`;
     },
@@ -38,6 +39,7 @@ app.get('/api/v1/bible/*/passage', cache({
     cacheName: 'bible-passages',
     cacheControl: 'public, s-maxage=2592000, max-age=0, must-revalidate', // 30 days
     keyGenerator: (c) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
         return `${c.req.url}:${cacheVersion}`;
     },
@@ -47,6 +49,7 @@ app.get('/api/v1/bible/*/reference', cache({
     cacheName: 'bible-reference',
     cacheControl: 'public, s-maxage=2592000, max-age=0, must-revalidate', // 30 days
     keyGenerator: (c) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
         return `${c.req.url}:${cacheVersion}`;
     },
@@ -56,6 +59,7 @@ app.get('/api/v1/bible/quotes', cache({
     cacheName: 'bible-quotes',
     cacheControl: 'public, s-maxage=300, max-age=0, must-revalidate', // 5 minutes
     keyGenerator: (c) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
         return `${c.req.url}:${cacheVersion}`;
     },
@@ -65,6 +69,7 @@ app.get('/api/v1/bible/daily-verse', cache({
     cacheName: 'bible-daily-verse',
     cacheControl: 'public, s-maxage=3600, max-age=0, must-revalidate', // 1 hour
     keyGenerator: (c) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
         return `${c.req.url}:${cacheVersion}`;
     },
@@ -74,6 +79,7 @@ app.get('/api/v1/bible/daily-verses', cache({
     cacheName: 'bible-daily-verses',
     cacheControl: 'public, s-maxage=3600, max-age=0, must-revalidate', // 1 hour
     keyGenerator: (c) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const cacheVersion = (c.env?.CACHE_VERSION as string | undefined) ?? 'v1';
         return `${c.req.url}:${cacheVersion}`;
     },
@@ -85,7 +91,7 @@ app.get('/', async (c) => {
     const hostname = url.hostname;
 
     // Check if accessed via publica subdomain
-    if (hostname.startsWith('publica.')) {
+    if (hostname.startsWith('publica.') || hostname.startsWith('propune.')) {
         // Serve /publica content directly without redirect
         const publicaUrl = new URL('/publica', url.origin);
         return app.fetch(new Request(publicaUrl.toString(), c.req.raw));

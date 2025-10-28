@@ -110,14 +110,6 @@ app.openapi(getDailyVersesRoute, async (c) => {
     const query = c.req.valid('query');
     const { startDate, endDate, bibleTranslationSlug } = query;
 
-    // Both startDate and endDate are required
-    if (startDate === undefined || endDate === undefined) {
-      return c.json({
-        success: false,
-        error: 'Both startDate and endDate are required',
-      }, 400);
-    }
-
     // Validate that startDate is before or equal to endDate
     if (new Date(startDate) > new Date(endDate)) {
       return c.json({
