@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "dev:wrangler": "dotenv -e .env -- wrangler dev",
+    "dev:wrangler": "dotenv -e .env -- wrangler dev --ip 0.0.0.0",
     "db:generate": "drizzle-kit generate",
     "db:push": "dotenv -e .env -- drizzle-kit push",
     "db:push:production": "dotenv -e .env.production -- drizzle-kit push",
