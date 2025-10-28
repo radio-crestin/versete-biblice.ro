@@ -14,9 +14,21 @@ app.get('/', async (c) => {
     .limit(1);
 
   // Get books data from translation (Drizzle handles JSON parsing automatically)
-  const booksData = vdccTranslation.length > 0 && vdccTranslation[0].books !== null
+  let booksData = vdccTranslation.length > 0 && vdccTranslation[0].books !== null
     ? vdccTranslation[0].books
     : [];
+
+  // Defensive: ensure booksData is always an array (handle potential double-encoding)
+  if (typeof booksData === 'string') {
+    try {
+      booksData = JSON.parse(booksData);
+    } catch {
+      booksData = [];
+    }
+  }
+  if (!Array.isArray(booksData)) {
+    booksData = [];
+  }
 
   const booksJson = JSON.stringify(booksData);
 
@@ -25,7 +37,7 @@ app.get('/', async (c) => {
     <html lang="ro">
       <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>Publică Versetul Tău Preferat - Versete Biblice</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
@@ -63,6 +75,21 @@ app.get('/', async (c) => {
           }
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+          }
+          @media (max-width: 640px) {
+            body {
+              font-size: 18px;
+            }
+            h2 {
+              font-size: 1.5rem;
+            }
+            .form-input, .combobox-trigger {
+              font-size: 16px;
+            }
+            .btn-primary, .btn-secondary, .btn-ghost {
+              font-size: 16px;
+            }
           }
           .form-input {
             transition: all 0.2s;
@@ -192,7 +219,7 @@ app.get('/', async (c) => {
                 <div>
                   <h2 class="text-xl font-semibold text-gray-900 mb-2">Bine ai venit!</h2>
                   <p class="text-sm text-gray-600">
-                    Înainte de a începe, spune-ne cum te cheamă. Numele tău va fi afișat alături de versetul tău preferat.
+                    Înainte de a începe, spune-ne cum te numești sau continuă ca anonim.
                   </p>
                 </div>
 
@@ -208,7 +235,7 @@ app.get('/', async (c) => {
                     class="form-input w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400"
                   />
                   <p class="text-xs text-gray-500">
-                    Acest nume va fi vizibil public (opțional)
+                    Acest nume ar putea fi afișat public împreună cu versetul tău. 
                   </p>
                 </div>
 
