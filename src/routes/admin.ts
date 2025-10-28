@@ -2,7 +2,7 @@ import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
 import { db, translations } from '@/db/index.js';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { generateBooksDataJSON } from '@/services/books-generator.js';
+import { generateBooksData } from '@/services/books-generator.js';
 import { ErrorSchema, SuccessSchema } from '@/schemas/index.js';
 import { getTranslationSlugs } from '@/utils/dynamic-schema.js';
 import type { Context } from 'hono';
@@ -124,14 +124,13 @@ app.openapi(generateBooksRoute, async (c) => {
     }
 
     // Generate books data
-    const booksJSON = await generateBooksDataJSON(bibleTranslationSlug);
-    const books = JSON.parse(booksJSON);
+    const books = await generateBooksData(bibleTranslationSlug);
 
-    // Update translation with books data
+    // Update translation with books data (Drizzle handles JSON serialization)
     await db
       .update(translations)
       .set({
-        books: booksJSON,
+        books,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(translations.slug, bibleTranslationSlug));
@@ -214,12 +213,12 @@ app.openapi(generateAllBooksRoute, async (c) => {
     let processed = 0;
     for (const translation of allTranslations) {
       try {
-        const booksJSON = await generateBooksDataJSON(translation.slug);
+        const books = await generateBooksData(translation.slug);
 
         await db
           .update(translations)
           .set({
-            books: booksJSON,
+            books,
             updatedAt: new Date().toISOString(),
           })
           .where(eq(translations.slug, translation.slug));

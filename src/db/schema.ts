@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
+import type { BookData } from '@/services/books-generator.js';
 
 /**
  * Translations table - stores Bible translation metadata
@@ -19,7 +20,7 @@ export const translations = sqliteTable('translations', {
   totalChapters: integer('total_chapters').notNull().default(0),
   totalVerses: integer('total_verses').notNull().default(0),
   copyrightNotice: text('copyright_notice'), // Copyright information for the translation
-  books: text('books', { mode: 'json' }), // JSON array of books with chapter/verse structure
+  books: text('books', { mode: 'json' }).$type<BookData[] | null>(), // JSON array of books with chapter/verse structure
 
   // Timestamps
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),

@@ -57,6 +57,7 @@ export async function generateBooksData(translationSlug: string): Promise<BookDa
 
     // Update max verse for this chapter
     const currentMax = book.versesByChapter[verse.chapter];
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (currentMax === undefined || verse.verse > currentMax) {
       book.versesByChapter[verse.chapter] = verse.verse;
     }
@@ -74,10 +75,3 @@ export async function generateBooksData(translationSlug: string): Promise<BookDa
   return books;
 }
 
-/**
- * Generate and return books data as JSON string for database storage
- */
-export async function generateBooksDataJSON(translationSlug: string): Promise<string> {
-  const books = await generateBooksData(translationSlug);
-  return JSON.stringify(books);
-}

@@ -95,16 +95,11 @@ app.openapi(getAllTranslationsRoute, async (c) => {
         results = await db.select().from(translations);
       }
 
-      // Parse books JSON for each translation
-      const translationsWithBooks = results.map((translation) => ({
-        ...translation,
-        books: (translation.books !== null && translation.books !== '') ? JSON.parse(translation.books as string) : null,
-      }));
-
+      // Drizzle handles JSON parsing automatically with mode: 'json'
       return c.json({
         success: true,
-        count: translationsWithBooks.length,
-        translations: translationsWithBooks,
+        count: results.length,
+        translations: results,
       }, 200);
     } catch (error) {
       console.error('Error fetching translations:', error);
