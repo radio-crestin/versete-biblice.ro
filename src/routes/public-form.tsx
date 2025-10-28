@@ -13,15 +13,10 @@ app.get('/', async (c) => {
     .where(eq(translations.slug, 'vdcc'))
     .limit(1);
 
-  // Parse books data from translation
-  let booksData: unknown[] = [];
-  if (vdccTranslation.length > 0 && vdccTranslation[0].books !== null && vdccTranslation[0].books !== '') {
-    try {
-      booksData = JSON.parse(vdccTranslation[0].books as string) as unknown[];
-    } catch (error) {
-      console.error('Error parsing books data:', error);
-    }
-  }
+  // Get books data from translation (Drizzle handles JSON parsing automatically)
+  const booksData = vdccTranslation.length > 0 && vdccTranslation[0].books !== null
+    ? vdccTranslation[0].books
+    : [];
 
   const booksJson = JSON.stringify(booksData);
 
@@ -275,6 +270,7 @@ app.get('/', async (c) => {
                           placeholder="Caută carte..."
                           class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           id="book-search"
+                          inputmode="search"
                         />
                       </div>
                       <div class="combobox-list" id="book-options"></div>
@@ -309,6 +305,7 @@ app.get('/', async (c) => {
                             placeholder="Caută capitol..."
                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                             id="chapter-search"
+                            inputmode="search"
                           />
                         </div>
                         <div class="combobox-list" id="chapter-options"></div>
@@ -340,6 +337,7 @@ app.get('/', async (c) => {
                             placeholder="Caută verset..."
                             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                             id="startVerse-search"
+                            inputmode="search"
                           />
                         </div>
                         <div class="combobox-list" id="startVerse-options"></div>
@@ -560,7 +558,14 @@ app.get('/', async (c) => {
               this.trigger.setAttribute('aria-expanded', 'true');
               this.search.value = '';
               this.render();
-              setTimeout(() => this.search.focus(), 100);
+              // Focus the search input and trigger keyboard on mobile
+              setTimeout(() => {
+                this.search.focus();
+                // For mobile devices, ensure keyboard appears
+                if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                  this.search.click();
+                }
+              }, 150);
             }
 
             close() {
