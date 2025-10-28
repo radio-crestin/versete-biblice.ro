@@ -4,9 +4,27 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { generateBooksDataJSON } from '@/services/books-generator.js';
 import { ErrorSchema, SuccessSchema } from '@/schemas/index.js';
+import { getTranslationSlugs } from '@/utils/dynamic-schema.js';
 import type { Context } from 'hono';
 
 const app = new OpenAPIHono();
+
+/**
+ * Create dynamic admin param schema with actual translation slugs
+ */
+function createAdminParamSchema() {
+  const translationSlugs = getTranslationSlugs();
+
+  return z.object({
+    bibleTranslationSlug: z.enum(translationSlugs as [string, ...string[]]).describe('Translation slug').openapi({
+      param: {
+        name: 'bibleTranslationSlug',
+        in: 'path',
+      },
+      example: translationSlugs[0] ?? 'vdcc',
+    }),
+  });
+}
 
 /**
  * Validate system token from query parameter
@@ -25,20 +43,20 @@ function validateToken(c: Context, providedToken: string | undefined): { valid: 
   return { valid: true };
 }
 
-// POST /api/v1/internal/generate-books/:slug - Generate books data for a translation
+// POST /api/v1/admin/generate-books/:bibleTranslationSlug - Generate books data for a translation
 const generateBooksRoute = createRoute({
   method: 'post',
-  path: '/generate-books/{slug}',
+  path: '/generate-books/{bibleTranslationSlug}',
   operationId: 'generateBooks',
   tags: ['Admin API'],
   summary: 'Generate books data for a translation',
-  description: 'Internal endpoint to generate and store books data for a translation. Requires system token as query parameter.',
+  description: 'Admin endpoint to generate and store books data for a translation. Requires system token as query parameter.',
   request: {
-    params: z.object({
-      slug: z.string().min(1).describe('Translation slug'),
-    }),
+    params: createAdminParamSchema(),
     query: z.object({
-      token: z.string().min(1).describe('System authentication token'),
+      systemToken: z.string().min(1).describe('System authentication token').openapi({
+        example: 'your-system-token-here',
+      }),
     }),
   },
   responses: {
@@ -59,7 +77,7 @@ const generateBooksRoute = createRoute({
           schema: ErrorSchema,
         },
       },
-      description: 'Unauthorized - Invalid or missing token query parameter',
+      description: 'Unauthorized - Invalid or missing systemToken query parameter',
     },
     404: {
       content: {
@@ -83,11 +101,11 @@ const generateBooksRoute = createRoute({
 app.openapi(generateBooksRoute, async (c) => {
   const validatedParams = c.req.valid('param');
   const validatedQuery = c.req.valid('query');
-  const slug = validatedParams.slug;
-  const token = validatedQuery.token;
+  const bibleTranslationSlug = validatedParams.bibleTranslationSlug;
+  const systemToken = validatedQuery.systemToken;
 
   // Validate token
-  const tokenValidation = validateToken(c, token);
+  const tokenValidation = validateToken(c, systemToken);
   if (!tokenValidation.valid) {
     const statusCode = tokenValidation.error === 'System token not configured' ? 500 : 401;
     return c.json({ success: false, error: tokenValidation.error ?? 'Unauthorized' }, statusCode);
@@ -98,7 +116,7 @@ app.openapi(generateBooksRoute, async (c) => {
     const translation = await db
       .select()
       .from(translations)
-      .where(eq(translations.slug, slug))
+      .where(eq(translations.slug, bibleTranslationSlug))
       .limit(1);
 
     if (translation.length === 0) {
@@ -106,7 +124,7 @@ app.openapi(generateBooksRoute, async (c) => {
     }
 
     // Generate books data
-    const booksJSON = await generateBooksDataJSON(slug);
+    const booksJSON = await generateBooksDataJSON(bibleTranslationSlug);
     const books = JSON.parse(booksJSON);
 
     // Update translation with books data
@@ -116,12 +134,12 @@ app.openapi(generateBooksRoute, async (c) => {
         books: booksJSON,
         updatedAt: new Date().toISOString(),
       })
-      .where(eq(translations.slug, slug));
+      .where(eq(translations.slug, bibleTranslationSlug));
 
     return c.json(
       {
         success: true,
-        message: `Books data generated for translation: ${slug}`,
+        message: `Books data generated for translation: ${bibleTranslationSlug}`,
         booksCount: books.length,
       },
       200
@@ -132,17 +150,19 @@ app.openapi(generateBooksRoute, async (c) => {
   }
 });
 
-// POST /api/v1/internal/generate-all-books - Generate books data for all translations
+// POST /api/v1/admin/generate-all-books - Generate books data for all translations
 const generateAllBooksRoute = createRoute({
   method: 'post',
   path: '/generate-all-books',
   operationId: 'generateAllBooks',
   tags: ['Admin API'],
   summary: 'Generate books data for all translations',
-  description: 'Internal endpoint to generate and store books data for all translations. Requires system token as query parameter.',
+  description: 'Admin endpoint to generate and store books data for all translations. Requires system token as query parameter.',
   request: {
     query: z.object({
-      token: z.string().min(1).describe('System authentication token'),
+      systemToken: z.string().min(1).describe('System authentication token').openapi({
+        example: 'your-system-token-here',
+      }),
     }),
   },
   responses: {
@@ -163,7 +183,7 @@ const generateAllBooksRoute = createRoute({
           schema: ErrorSchema,
         },
       },
-      description: 'Unauthorized - Invalid or missing token query parameter',
+      description: 'Unauthorized - Invalid or missing systemToken query parameter',
     },
     500: {
       content: {
@@ -178,10 +198,10 @@ const generateAllBooksRoute = createRoute({
 
 app.openapi(generateAllBooksRoute, async (c) => {
   const validatedQuery = c.req.valid('query');
-  const token = validatedQuery.token;
+  const systemToken = validatedQuery.systemToken;
 
   // Validate token
-  const tokenValidation = validateToken(c, token);
+  const tokenValidation = validateToken(c, systemToken);
   if (!tokenValidation.valid) {
     const statusCode = tokenValidation.error === 'System token not configured' ? 500 : 401;
     return c.json({ success: false, error: tokenValidation.error ?? 'Unauthorized' }, statusCode);

@@ -10,3 +10,4 @@
 - use tailwindcss for styling
 - use @/ as the base path for imports
 - use bibleTranslationSlug everywhere, not just translation
+- for bibleTranslationSlug make sure to fetch the options in openapi like we did it for /api/v1/bible/{bibleTranslationSlug}/passage endpoint

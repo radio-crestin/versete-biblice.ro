@@ -55,9 +55,8 @@ async function main() {
   try {
     await generateTranslations();
     console.log('\n💡 To generate books data, use the admin API:');
-    console.log('   POST /api/v1/admin/generate-books/:slug');
-    console.log('   POST /api/v1/admin/generate-all-books');
-    console.log('   (Requires Authorization: Bearer <SYSTEM_TOKEN>)');
+    console.log('   POST /api/v1/admin/generate-books/:bibleTranslationSlug?systemToken=<SYSTEM_TOKEN>');
+    console.log('   POST /api/v1/admin/generate-all-books?systemToken=<SYSTEM_TOKEN>');
     process.exit(0);
   } catch (error) {
     console.error('❌ Error:', error);
