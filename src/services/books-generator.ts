@@ -57,7 +57,7 @@ export async function generateBooksData(translationSlug: string): Promise<BookDa
 
     // Update max verse for this chapter
     const currentMax = book.versesByChapter[verse.chapter];
-    if (verse.verse > currentMax) {
+    if (currentMax === undefined || verse.verse > currentMax) {
       book.versesByChapter[verse.chapter] = verse.verse;
     }
   }
