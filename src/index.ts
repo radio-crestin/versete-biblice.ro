@@ -216,7 +216,7 @@ This is an open-source project! If you want to contribute, check out the reposit
 // Scalar API Reference (primary documentation)
 api.get(
     '/api/docs/*',
-    Scalar((c) => {
+    Scalar((c: any) => {
         const url = new URL(c.req.url);
         const isLocalDev = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
 
