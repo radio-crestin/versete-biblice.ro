@@ -37,7 +37,7 @@ app.get('/', async (c) => {
     <html lang="ro">
       <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Publică Versetul Tău Preferat - Versete Biblice</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
@@ -168,6 +168,9 @@ app.get('/', async (c) => {
             border-bottom: 1px solid hsl(214.3 31.8% 91.4%);
             padding: 8px;
           }
+          .combobox-search input {
+            font-size: 16px;
+          }
           .combobox-list {
             padding: 4px;
           }
@@ -295,9 +298,13 @@ app.get('/', async (c) => {
                         <input
                           type="text"
                           placeholder="Caută carte..."
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md"
                           id="book-search"
-                          inputmode="search"
+                          inputmode="text"
+                          autocomplete="off"
+                          autocorrect="off"
+                          autocapitalize="off"
+                          spellcheck="false"
                         />
                       </div>
                       <div class="combobox-list" id="book-options"></div>
@@ -330,9 +337,14 @@ app.get('/', async (c) => {
                           <input
                             type="text"
                             placeholder="Caută capitol..."
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md"
                             id="chapter-search"
-                            inputmode="search"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            autocomplete="off"
+                            autocorrect="off"
+                            autocapitalize="off"
+                            spellcheck="false"
                           />
                         </div>
                         <div class="combobox-list" id="chapter-options"></div>
@@ -362,9 +374,14 @@ app.get('/', async (c) => {
                           <input
                             type="text"
                             placeholder="Caută verset..."
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md"
                             id="startVerse-search"
-                            inputmode="search"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            autocomplete="off"
+                            autocorrect="off"
+                            autocapitalize="off"
+                            spellcheck="false"
                           />
                         </div>
                         <div class="combobox-list" id="startVerse-options"></div>
@@ -466,6 +483,35 @@ app.get('/', async (c) => {
             return null;
           }
 
+          // Helper function to normalize Romanian text by removing diacritics
+          function normalizeRomanian(text) {
+            const diacriticsMap = {
+              'ă': 'a', 'Ă': 'A',
+              'â': 'a', 'Â': 'A',
+              'î': 'i', 'Î': 'I',
+              'ș': 's', 'Ș': 'S',
+              'ț': 't', 'Ț': 'T',
+              'à': 'a', 'À': 'A',
+              'á': 'a', 'Á': 'A',
+              'ä': 'a', 'Ä': 'A',
+              'è': 'e', 'È': 'E',
+              'é': 'e', 'É': 'E',
+              'ë': 'e', 'Ë': 'E',
+              'ì': 'i', 'Ì': 'I',
+              'í': 'i', 'Í': 'I',
+              'ï': 'i', 'Ï': 'I',
+              'ò': 'o', 'Ò': 'O',
+              'ó': 'o', 'Ó': 'O',
+              'ö': 'o', 'Ö': 'O',
+              'ù': 'u', 'Ù': 'U',
+              'ú': 'u', 'Ú': 'U',
+              'ü': 'u', 'Ü': 'U'
+            };
+
+            return text.replace(/[ăĂâÂîÎșȘțȚàÀáÁäÄèÈéÉëËìÌíÍïÏòÒóÓöÖùÙúÚüÜ]/g,
+              match => diacriticsMap[match] || match);
+          }
+
           // Combobox class for searchable dropdowns
           class Combobox {
             constructor(id, options = {}) {
@@ -544,9 +590,13 @@ app.get('/', async (c) => {
             }
 
             filter(query) {
-              const filtered = this.items.filter(item =>
-                item.label.toLowerCase().includes(query.toLowerCase())
-              );
+              // Normalize the query for diacritics-insensitive search
+              const normalizedQuery = normalizeRomanian(query.toLowerCase());
+
+              const filtered = this.items.filter(item => {
+                const normalizedLabel = normalizeRomanian(item.label.toLowerCase());
+                return normalizedLabel.includes(normalizedQuery);
+              });
 
               this.listEl.innerHTML = '';
               if (filtered.length === 0) {
@@ -585,14 +635,38 @@ app.get('/', async (c) => {
               this.trigger.setAttribute('aria-expanded', 'true');
               this.search.value = '';
               this.render();
+
               // Focus the search input and trigger keyboard on mobile
-              setTimeout(() => {
+              // Use multiple strategies for better mobile compatibility
+              const focusSearch = () => {
                 this.search.focus();
-                // For mobile devices, ensure keyboard appears
+                // Set cursor position to trigger keyboard
+                this.search.setSelectionRange(0, 0);
+
+                // Additional trigger for mobile keyboards
                 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                  // Trigger a click event which helps on some mobile browsers
                   this.search.click();
+
+                  // For iOS specifically, sometimes we need to trigger a touchstart
+                  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    const touchEvent = new TouchEvent('touchstart', {
+                      bubbles: true,
+                      cancelable: true,
+                      view: window
+                    });
+                    this.search.dispatchEvent(touchEvent);
+                  }
                 }
-              }, 150);
+              };
+
+              // Try immediate focus first
+              focusSearch();
+
+              // Then try with requestAnimationFrame for browsers that need it
+              requestAnimationFrame(() => {
+                focusSearch();
+              });
             }
 
             close() {
@@ -616,12 +690,14 @@ app.get('/', async (c) => {
               this.close();
             }
 
-            reset(placeholder) {
+            reset(placeholder, clearItems = true) {
               this.selectedValue = null;
               this.selectedLabel = null;
               this.hiddenInput.value = '';
               this.valueEl.textContent = placeholder || this.placeholder;
-              this.items = [];
+              if (clearItems) {
+                this.items = [];
+              }
               this.render();
             }
 
@@ -803,7 +879,7 @@ app.get('/', async (c) => {
 
               // Show success state with verse count
               const quoteId = data.quote.id;
-              verseCountMessage.textContent = 'Ai trimis al ' + quoteId + '-lea verset spre a fi publicat.';
+              verseCountMessage.textContent = 'Ești a ' + quoteId + '-a persoană care a trimis un verset spre a fi publicat.';
 
               step2.classList.add('hidden');
               successState.classList.remove('hidden');
@@ -821,7 +897,7 @@ app.get('/', async (c) => {
           submitAnotherBtn.addEventListener('click', () => {
             // Reset form
             quoteForm.reset();
-            bookCombobox.reset('Selectează o carte...');
+            bookCombobox.reset('Selectează o carte...', false);  // Keep book items
             chapterCombobox.reset('Mai întâi selectează o carte');
             chapterCombobox.disable();
             startVerseCombobox.reset('Mai întâi selectează un capitol');
