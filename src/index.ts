@@ -197,7 +197,21 @@ This is an open-source project! If you want to contribute, check out the reposit
                 name: 'Daily Bible Verses',
                 description: 'Daily Bible verse scheduling and retrieval',
             },
+            {
+                name: 'Internal API',
+                description: 'Internal API endpoints for system operations (requires authentication)',
+            },
         ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'token',
+                    description: 'System token for internal API authentication. Set this to your SYSTEM_TOKEN environment variable value.',
+                },
+            },
+        },
     };
 });
 
