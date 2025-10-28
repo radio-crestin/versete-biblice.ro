@@ -16,7 +16,7 @@ const getAllTranslationsRoute = createRoute({
   path: '/',
   operationId: 'getTranslations',
   tags: ['Bible API'],
-  summary: 'Get translations',
+  summary: 'Get Bible translations',
   description: `Retrieve a list of all available Bible translations. Optionally filter by language code.
 
 **Examples:**

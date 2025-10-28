@@ -1,11 +1,29 @@
 import { Hono } from 'hono';
-import vdccBooksData from '@/data/vdcc-books.json';
+import { db, translations } from '@/db/index.js';
+import { eq } from 'drizzle-orm';
 
 const app = new Hono();
 
 // Serve the quote submission form
-app.get('/', (c) => {
-  const booksJson = JSON.stringify(vdccBooksData.books);
+app.get('/', async (c) => {
+  // Fetch VDCC translation with books data
+  const vdccTranslation = await db
+    .select()
+    .from(translations)
+    .where(eq(translations.slug, 'vdcc'))
+    .limit(1);
+
+  // Parse books data from translation
+  let booksData: unknown[] = [];
+  if (vdccTranslation.length > 0 && vdccTranslation[0].books !== null && vdccTranslation[0].books !== '') {
+    try {
+      booksData = JSON.parse(vdccTranslation[0].books as string) as unknown[];
+    } catch (error) {
+      console.error('Error parsing books data:', error);
+    }
+  }
+
+  const booksJson = JSON.stringify(booksData);
 
   return c.html(`
     <!DOCTYPE html>
@@ -633,8 +651,8 @@ app.get('/', (c) => {
               const selectedBook = bookCombobox.getSelectedItem();
               if (selectedBook) {
                 const book = BOOKS.find(b => b.slug === selectedBook.value);
-                const chaptersData = book.chapters;
-                const maxVerses = chaptersData[item.value] || 100;
+                const versesByChapter = book.versesByChapter;
+                const maxVerses = versesByChapter[item.value] || 100;
 
                 const verses = [];
                 for (let i = 1; i <= maxVerses; i++) {

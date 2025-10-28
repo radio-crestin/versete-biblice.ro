@@ -12,6 +12,8 @@
     "db:studio": "drizzle-kit studio",
     "upload:translation": "dotenv -e .env -- tsx src/scripts/upload-translation.ts bibles/raw/ron-rccv.usfx.xml vdcc",
     "generate:docs-options": "dotenv -e .env -- tsx scripts/generate-docs-options.ts",
+    "generate:books": "dotenv -e .env -- bash -c 'curl -X POST \"http://localhost:8787/api/v1/internal/generate-all-books\" -H \"Authorization: Bearer $SYSTEM_TOKEN\"'",
+    "generate:books:production": "dotenv -e .env.production -- bash -c 'curl -X POST \"https://versete-biblice.ro/api/v1/internal/generate-all-books\" -H \"Authorization: Bearer $SYSTEM_TOKEN\"'",
     "predeploy": "npm run generate:docs-options",
     "deploy:production": "wrangler deploy --minify",
     "push:env:production": "dotenv -e .env.production -- tsx src/scripts/push-env.ts production",
